@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ASIQPAI Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+  /* Prototype host chrome (not product UI) */
+  html, body { height: 100%; }
+  body { background: #070706; display: flex; flex-direction: column; min-height: 100%; }
+  .host { flex: 1; display: grid; grid-template-columns: 280px 1fr; min-height: 0; }
+  .side { border-right: 1px solid var(--line); padding: 20px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; font-size: 13px; }
+  .side h1 { font-family: var(--font-display); font-size: 14px; letter-spacing: 0.08em; margin: 0; display: flex; align-items: center; gap: 10px; }
+  .side h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3); margin: 0 0 6px; }
+  .side .nav { display: flex; flex-direction: column; gap: 2px; }
+  .side .nav button { text-align: left; background: none; border: 0; color: var(--fg-2); padding: 7px 10px; border-radius: 8px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+  .side .nav button:hover { background: var(--surface-1); color: var(--fg); }
+  .side .nav button.is-active { background: var(--gold-wash); color: var(--gold-hi); }
+  .side .nav button small { color: var(--fg-3); font-family: var(--font-mono); font-size: 10px; }
+  .side label.row { justify-content: space-between; font-size: 13px; color: var(--fg-2); }
+  .stage { display: flex; align-items: center; justify-content: center; padding: 24px; overflow: auto; position: relative; }
+  .stage--wide .phone { width: min(100%, 900px); height: min(100%, 760px); border-radius: 16px; }
+  .stage__bar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: var(--surface-1); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+  .stage__bar button { border: 0; background: none; color: var(--fg-3); font-size: 12px; padding: 6px 12px; border-radius: 999px; }
+  .stage__bar button.is-active { background: var(--surface-3); color: var(--fg); }
+  .menu-toggle { display: none; }
+  @media (max-width: 760px) {
+    .host { grid-template-columns: 1fr; }
+    .side { display: none; }
+    .side.is-open { display: flex; position: fixed; inset: 0; z-index: 100; background: var(--bg); }
+    .stage { padding: 0; }
+    .stage__bar { display: none; }
+    .phone { width: 100%; height: 100%; border-radius: 0; box-shadow: none; --safe-top: 12px; --safe-bottom: 12px; }
+    .phone__notch, .phone__status, .phone__home { display: none; }
+    .menu-toggle { display: grid; position: fixed; right: 12px; top: 12px; z-index: 101; }
+  }
+  @media (max-height: 900px) and (min-width: 761px) { .phone { transform: scale(0.9); transform-origin: center; } }
+  @media (max-height: 820px) and (min-width: 761px) { .phone { transform: scale(0.82); } }
+</style>
+</head>
+<body>
+<div class="host">
+  <aside class="side" id="side">
+    <h1><span class="brand__mark">${ic}</span>ASIQPAI · прототип v1</h1>
+    <p class="t-xs c-3" style="margin:0">Кликабельный прототип по ТЗ «Разработка UX/UI-дизайна Telegram Mini App ASIQPAI». Демо-данные вымышленные.</p>
+    <div><h2>Сценарии</h2><div class="nav" id="nav-flows"></div></div>
+    <div><h2>Экраны</h2><div class="nav" id="nav-screens"></div></div>
+    <div><h2>Состояния</h2><div class="nav" id="nav-states"></div></div>
+    <div><h2>Проверки</h2>
+      <div class="stack" style="--gap:10px">
+        <label class="row"><span>Крупный текст (+30%)</span><span class="switch"><input type="checkbox" id="opt-ts"></span></label>
+        <label class="row"><span>Нет сети</span><span class="switch"><input type="checkbox" id="opt-offline"></span></label>
+        <label class="row"><span>Пустая библиотека</span><span class="switch"><input type="checkbox" id="opt-empty"></span></label>
+        <label class="row"><span>Длинные строки (KZ)</span><span class="switch"><input type="checkbox" id="opt-kz"></span></label>
+      </div>
+    </div>
+    <p class="t-xs c-3" style="margin-top:auto">Esc — закрыть шит · ← — назад</p>
+  </aside>
+  <button class="icon-btn icon-btn--filled menu-toggle" id="menu-toggle" aria-label="Меню">${menu}</button>
+  <main class="stage" id="stage">
+    <div class="stage__bar"><button class="is-active" data-size="phone">iPhone 390×844</button><button data-size="small">Small 320×568</button><button data-size="wide">Desktop Telegram</button></div>
+    <div class="phone" id="phone">
+      <div class="phone__notch"></div>
+      <div class="phone__status"><span id="clock">14:20</span><span class="row">${sig}</span></div>
+      <div id="app" style="position:absolute;inset:0"></div>
+      <div class="phone__home"></div>
+    </div>
+  </main>
+</div>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/screens/onboarding-home.js"></script>
+<script src="assets/js/screens/music.js"></script>
+<script src="assets/js/screens/studio.js"></script>
+<script src="assets/js/screens/samples.js"></script>
+<script src="assets/js/screens/community.js"></script>
+<script src="assets/js/screens/wallet-library-profile.js"></script>
+<script>
+(function () {
+  var A = ASQ;
+  document.body.innerHTML = document.body.innerHTML
+    .replace('${ic}', A.ic('mic', { style: '--ic:18px' })).replace('${menu}', A.ic('more'))
+    .replace('${sig}', '<svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor"><rect x="0.5" y="0.5" width="22" height="11" rx="3"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor" stroke="none"/><path d="M24 4v4" stroke-width="1.5"/></svg>');
+
+  var FLOWS = [
+    ['Онбординг → цель', 'onboarding', {}, true],
+    ['Записать трек (бит → MID/BACK/ADLIBS → FX → WAV)', 'beat-picker'],
+    ['Vocal Slicer + AI Fit', 'slicer'],
+    ['AI Samples из голоса', 'samples-gen'],
+    ['Купить лицензию', 'license', { id: 'b1' }],
+    ['Пополнить кошелёк', 'wallet'],
+    ['Опубликовать в сообществе', 'export-success']
+  ];
+  var SCREENS = [
+    ['Home', 'home', 'tab'], ['Music', 'music', 'tab'], ['Beat', 'beat', { id: 'b1' }], ['Player', 'player'], ['Studio hub', 'studio', 'tab'], ['Recording', 'studio-record', { id: 'p1' }], ['Processing / FX', 'studio-fx'], ['Export', 'export'],
+    ['AI Samples', 'samples'], ['Sample pack', 'pack', { id: 's1' }], ['Samples result', 'samples-result'], ['Community', 'community', 'tab'], ['Post', 'post', { id: 'c1' }], ['Wallet', 'wallet'], ['Plans', 'plans'], ['Library', 'library', 'tab'], ['Profile', 'profile'], ['Settings', 'settings'], ['Notifications', 'notifications']
+  ];
+  var STATES = [
+    ['Loading (skeleton)', 'loading'], ['Empty: поиск', 'music', { empty: true }], ['Empty: кошелёк', 'wallet', { empty: true }], ['AI: прогресс', 'ai-progress', { title: 'AI Fit', steps: ['Анализ', 'Тайминг', 'Тон', 'Рендер'], next: 'studio-fx', cost: 50, fail: true }], ['AI: ошибка', 'ai-error', {}], ['Success: покупка', 'purchase-success', { id: 'b1' }], ['Нет сети', 'offline'], ['Нет микрофона', 'mic-denied'], ['Мало кредитов', 'low-credits'], ['Техработы', 'maintenance']
+  ];
+  function navHtml(list, id) {
+    document.getElementById(id).innerHTML = list.map(function (x, i) { return '<button data-i="' + i + '"><span>' + x[0] + '</span><small>' + x[1] + '</small></button>'; }).join('');
+    document.getElementById(id).addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var x = list[+b.dataset.i]; open(x); closeMenu(); });
+  }
+  function open(x) {
+    A.state.playing = null; A.state.playPaused = true; A.state.studio.recording = false; clearInterval(A._aiT); clearInterval(A._recT);
+    if (x[2] === 'tab') { A.setTab(x[1]); return; }
+    var home = { home: 1, music: 1, studio: 1, community: 1, library: 1 };
+    A.state.stack = []; A.state.tab = ({ 'studio-record': 'studio', 'studio-fx': 'studio', export: 'studio', slicer: 'studio', samples: 'studio', pack: 'studio', 'samples-gen': 'studio', 'samples-result': 'studio', beat: 'music', license: 'music', player: 'music', post: 'community', wallet: 'home', plans: 'home', profile: 'home', settings: 'home', notifications: 'home', 'beat-picker': 'studio' })[x[1]] || 'home';
+    if (home[x[1]]) A.setTab(x[1]); else A.go(x[1], x[2] || {});
+    if (x[1] === 'player') { A.state.playing = 'b1'; A.state.playPaused = false; A.render(); }
+  }
+  navHtml(FLOWS, 'nav-flows'); navHtml(SCREENS, 'nav-screens'); navHtml(STATES, 'nav-states');
+
+  A.onRender = function (cur) {
+    document.querySelectorAll('.side .nav button').forEach(function (b) { b.classList.toggle('is-active', b.querySelector('small').textContent === cur.name); });
+  };
+  A.mount(document.getElementById('app'));
+  A.go('onboarding', { step: 0 });
+
+  // host options
+  var phone = document.getElementById('phone');
+  document.getElementById('opt-ts').addEventListener('change', function (e) { phone.style.setProperty('--ts', e.target.checked ? 1.3 : 1); });
+  document.getElementById('opt-offline').addEventListener('change', function (e) { A.state.offline = e.target.checked; A.render(); });
+  document.getElementById('opt-empty').addEventListener('change', function (e) { A.state.demoFlags.emptyLibrary = e.target.checked; A.setTab('library'); });
+  document.getElementById('opt-kz').addEventListener('change', function (e) {
+    if (e.target.checked) { A.DATA.me.name = 'ARMANBEK ЖАҢАБЕРГЕНОВ'; A.DATA.projects[0].title = 'Түнгі жол — үшінші дубль (қара нұсқа)'; A.DATA.beats[0].title = 'Night Drive (Qazaqsha remix)'; } else { A.DATA.me.name = 'ARMAN.K'; A.DATA.projects[0].title = 'Night Drive — take 3'; A.DATA.beats[0].title = 'Night Drive'; }
+    A.render();
+  });
+  var stage = document.getElementById('stage');
+  stage.querySelector('.stage__bar').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; stage.querySelectorAll('.stage__bar button').forEach(function (x) { x.classList.remove('is-active'); }); b.classList.add('is-active'); var s = b.dataset.size; stage.classList.toggle('stage--wide', s === 'wide'); phone.classList.toggle('phone--flat', s === 'wide'); phone.style.width = s === 'small' ? '320px' : ''; phone.style.height = s === 'small' ? '568px' : ''; A.render(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') A.dismiss(); if (e.key === 'ArrowLeft' && e.target.tagName !== 'INPUT') A.back(); });
+  function closeMenu() { document.getElementById('side').classList.remove('is-open'); }
+  document.getElementById('menu-toggle').addEventListener('click', function () { document.getElementById('side').classList.toggle('is-open'); });
+  setInterval(function () { var d = new Date(); document.getElementById('clock').textContent = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes(); }, 1000);
+})();
+</script>
+</body>
+</html>

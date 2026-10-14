@@ -1,0 +1,32 @@
+/* Screens: Community feed, post, challenges */
+(function (A) {
+  var D = A.DATA, ic = A.ic;
+
+  A.postCard = function (p, compact) {
+    var liked = A.state.likes[p.id];
+    return '<article class="post"><div class="post__head">' + A.avatar(p.av, p.hue, 'avatar--ring') + '<div class="grow"><div class="row" style="--gap:6px"><b class="t-sm">' + A.esc(p.user) + '</b>' + (p.badge ? '<span class="badge ' + (p.badge === 'Challenge' ? 'badge--gold' : '') + '">' + p.badge + '</span>' : '') + '</div><div class="t-xs c-3">' + A.esc(p.handle) + ' · ' + p.time + '</div></div><button class="icon-btn icon-btn--sm c-3" data-sheet="post-more" aria-label="Ещё">' + ic('more') + '</button></div>' +
+      '<p class="t-body ' + (compact ? 'clamp-2' : '') + '" style="margin:0">' + A.esc(p.text) + '</p>' +
+      '<div class="post__audio"><button class="icon-btn icon-btn--gold icon-btn--sm" data-act="play" data-id="b' + ((p.hue % 6) + 1) + '" aria-label="Слушать">' + ic('play') + '</button><div class="grow" style="--wh:30px">' + A.wave(p.hue, 40) + '</div><span class="t-mono c-3">' + A.fmtTime(p.dur) + '</span></div>' +
+      '<div class="post__actions"><button class="' + (liked ? 'is-on' : '') + '" data-act="like" data-id="' + p.id + '">' + ic('heart') + '<b>' + (p.likes + (liked ? 1 : 0)) + '</b></button><button data-go="post" data-id="' + p.id + '">' + ic('comment') + '<b>' + p.comments + '</b></button><button data-sheet="share">' + ic('share') + '</button><button style="margin-left:auto" data-act="toast" data-text="Запрос на фит отправлен" data-tone="success">' + ic('mic') + ' Фит</button></div></article>';
+  };
+
+  A.screens.community = function () {
+    return A.appbar({ cls: 'appbar--home', center: false, left: '', title: 'Сообщество', right: '<button class="icon-btn" data-act="soon" aria-label="Поиск">' + ic('search') + '</button><button class="icon-btn" data-sheet="publish" aria-label="Создать пост">' + ic('plusSquare') + '</button>' }) +
+      '<div class="screen__body screen__body--player screen__body--tight">' +
+      '<div class="hscroll" style="--gap:12px"><button class="story story--add" data-sheet="publish"><div class="avatar">' + ic('plus') + '</div>Твой пост</button>' + [['AW', 285, 'Aisha'], ['DB', 38, 'Dias'], ['QP', 160, 'Qara'], ['NZ', 205, 'NURZ'], ['MK', 320, 'Mira']].map(function (s) { return '<button class="story" data-act="soon">' + A.avatar(s[0], s[1], 'avatar--ring') + s[2] + '</button>'; }).join('') + '</div>' +
+      '<div class="seg"><button class="seg__item is-active" data-act="seg" data-show="feed">Лента</button><button class="seg__item" data-act="seg" data-show="chal">Челленджи</button><button class="seg__item" data-act="seg" data-show="feat">Ищут фит</button></div>' +
+      '<div data-pane="feed" class="stack" style="--gap:12px">' + D.posts.map(function (p) { return A.postCard(p); }).join('') + '<div class="row" style="justify-content:center;padding:12px"><div class="spinner"></div></div></div>' +
+      '<div data-pane="chal" hidden class="stack" style="--gap:12px">' + [['Куплет на Kui 2.0', 'Qara Prod', 'до 20 окт', 41, true], ['Хук за 60 секунд', 'ASIQPAI', 'до 25 окт', 128, false], ['Remix: Dala Wind', 'Qara Prod', 'завершён', 77, false]].map(function (c, i) { return '<button class="card ' + (c[4] ? 'card--gold' : '') + ' card--tap stack" style="--gap:8px"><div class="row row--between"><span class="badge ' + (c[4] ? 'badge--ai' : '') + '">' + ic('crown', { style: '--ic:12px' }) + ' ' + c[1] + '</span><span class="t-xs c-3">' + c[2] + '</span></div><h3 class="t-h3">' + c[0] + '</h3><div class="row row--between"><span class="t-sm c-2">' + c[3] + ' заявок</span>' + (c[2] !== 'завершён' ? '<span class="btn btn--sm btn--primary">Участвовать</span>' : '<span class="btn btn--sm btn--secondary">Итоги</span>') + '</div></button>'; }).join('') + '</div>' +
+      '<div data-pane="feat" hidden class="list">' + [['AW', 285, 'Aisha Wave', 'Ищу рэпера на Neon Steppe · 150 BPM'], ['NZ', 205, 'NURZ', 'Нужен хук на Glass Tower · Cm'], ['MK', 320, 'Mira K', 'Бэки на Qazaq pop, женский вокал']].map(function (f) { return '<button class="li" data-act="toast" data-text="Запрос отправлен" data-tone="success">' + A.avatar(f[0], f[1]) + '<div class="li__body"><span class="li__title">' + f[2] + '</span><span class="li__sub">' + f[3] + '</span></div><span class="btn btn--sm btn--outline">Откликнуться</span></button>'; }).join('') + '</div>' +
+      '</div>' + A.miniplayer() + A.tabbar('community');
+  };
+  A.sheets['post-more'] = function () { A.sheet('<div class="sheet__head"><h2 class="sheet__title">Пост</h2><button class="icon-btn" data-act="dismiss">' + ic('close') + '</button></div><div class="list list--plain">' + [['user', 'Профиль автора'], ['bookmark', 'Сохранить'], ['eyeOff', 'Скрыть автора'], ['flag', 'Пожаловаться']].map(function (x) { return '<button class="li" data-act="dismiss">' + ic(x[0], { cls: 'c-2' }) + '<span class="li__title">' + x[1] + '</span></button>'; }).join('') + '</div>'); };
+
+  A.screens.post = function (p) {
+    var post = D.posts.filter(function (x) { return x.id === p.id; })[0] || D.posts[0];
+    var comments = [['DB', 38, 'Dias Beats', 'Тайминг огонь. Давай фит?', '10 мин'], ['NZ', 205, 'NURZ', 'хук на 0:12 топ 🔥', '8 мин'], ['MK', 320, 'Mira K', 'AI Fit на сколько ставила?', '3 мин']];
+    return A.appbar({ back: true, title: 'Пост' }) + '<div class="screen__body screen__body--notab screen__body--tight">' + A.postCard(post) +
+      '<div class="section"><h3 class="t-h3">' + post.comments + ' комментариев</h3><div class="list list--plain">' + comments.map(function (c) { return '<div class="li" style="align-items:flex-start">' + A.avatar(c[0], c[1], '').replace('avatar ', 'avatar --av:32px ') + '<div class="li__body"><span class="t-sm"><b>' + c[2] + '</b> <span class="c-3">· ' + c[4] + '</span></span><span class="t-sm" style="white-space:normal">' + c[3] + '</span></div><button class="icon-btn icon-btn--sm c-3" data-act="toggle">' + ic('heart') + '</button></div>'; }).join('') + '</div></div></div>' +
+      '<div class="footer-actions footer-actions--row" style="align-items:center">' + A.avatar(D.me.avatar, 40, '').replace('avatar ', 'avatar --av:36px ') + '<input class="input grow" id="comment-input" placeholder="Комментарий…" style="min-height:44px;border-radius:999px"><button class="icon-btn icon-btn--gold" data-act="toast" data-text="Комментарий отправлен" data-tone="success" aria-label="Отправить">' + ic('send') + '</button></div>';
+  };
+})(ASQ);

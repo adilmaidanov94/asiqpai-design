@@ -1,0 +1,102 @@
+/* ==========================================================================
+   ASIQPAI Design Tokens v1.0
+   Concept: «тёмная студия, золотой сигнал» — warm near-black surfaces like a
+   dimmed control room; gold is reserved for the signal path (primary action,
+   record-armed MID track, active state). Everything else stays quiet.
+   Single dark look by design (brand requirement 3.1.5), color-scheme: dark.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Color: neutrals (warm bias toward gold) ---- */
+  --bg:          #0E0D0B;   /* app background */
+  --surface-1:   #171613;   /* cards, lists */
+  --surface-2:   #201E1A;   /* elevated: sheets, inputs */
+  --surface-3:   #2A2823;   /* pressed / hover / selected rows */
+  --line:        rgba(242, 226, 190, 0.08);
+  --line-strong: rgba(242, 226, 190, 0.16);
+
+  --fg:   #F4EFE4;          /* primary text  — 17.4:1 on --bg */
+  --fg-2: #B9B2A3;          /* secondary     —  9.0:1 */
+  --fg-3: #847E71;          /* tertiary/meta —  4.8:1 */
+
+  /* ---- Color: brand gold (signal) ---- */
+  --gold:      #D9AE52;
+  --gold-hi:   #F0CF7E;
+  --gold-lo:   #A67C2B;
+  --gold-ink:  #1A1408;      /* text/icons on gold */
+  --gold-wash: rgba(217, 174, 82, 0.12);
+  --gold-line: rgba(217, 174, 82, 0.40);
+  --gold-grad: linear-gradient(135deg, #F0CF7E 0%, #D9AE52 45%, #B48834 100%);
+
+  /* ---- Color: track lanes (recording) ---- */
+  --trk-mid:    #D9AE52;     /* MID — lead vocal */
+  --trk-back:   #79A6D2;     /* BACK — doubles / backing */
+  --trk-adlibs: #D97A9B;     /* ADLIBS */
+  --trk-beat:   #8C8676;     /* beat (reference) */
+
+  /* ---- Color: semantic (separate from accent) ---- */
+  --success:      #4CC38A;
+  --success-wash: rgba(76, 195, 138, 0.12);
+  --warning:      #F2A93B;
+  --warning-wash: rgba(242, 169, 59, 0.12);
+  --danger:       #F0605D;
+  --danger-wash:  rgba(240, 96, 93, 0.12);
+  --info:         #79A6D2;
+  --info-wash:    rgba(121, 166, 210, 0.12);
+  --rec:          #F0605D;   /* record indicator */
+
+  --scrim: rgba(6, 5, 4, 0.72);
+
+  /* ---- Typography ---- */
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body:    "Onest", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ts: 1;   /* user text-scale multiplier (system font size / a11y test) */
+  --fs-display: calc(30px * var(--ts));
+  --fs-h1:      calc(24px * var(--ts));
+  --fs-h2:      calc(19px * var(--ts));
+  --fs-h3:      calc(16px * var(--ts));
+  --fs-body:    calc(15px * var(--ts));
+  --fs-sm:      calc(13px * var(--ts));
+  --fs-xs:      calc(12px * var(--ts));
+  --fs-label:   calc(11px * var(--ts));
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.3;
+  --lh-body:  1.47;
+
+  /* ---- Spacing (4px base) ---- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+  --gutter: 16px;            /* screen side padding */
+
+  /* ---- Radii ---- */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 999px;
+
+  /* ---- Sizes ---- */
+  --touch: 44px;             /* min touch target */
+  --appbar-h: 56px;
+  --tabbar-h: 64px;
+  --miniplayer-h: 60px;
+
+  /* ---- Elevation ---- */
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-sheet: 0 -16px 48px rgba(0, 0, 0, 0.55);
+  --glow-gold: 0 0 0 1px var(--gold-line), 0 10px 28px rgba(217, 174, 82, 0.20);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
+  --d-fast: 120ms; --d-base: 200ms; --d-slow: 320ms;
+
+  /* ---- Telegram safe areas (Bot API 8.0+), with env() fallback ---- */
+  --safe-top: calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--tg-content-safe-area-inset-top, 0px));
+  --safe-bottom: max(var(--tg-safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-fast: 0ms; --d-base: 0ms; --d-slow: 0ms; }
+}

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASIQPAI Design Package</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="docs/doc.css">
+<style>
+  .hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center; margin-bottom: 48px; }
+  .hero__art { border-radius: 24px; overflow: hidden; border: 1px solid var(--gold-line); background: var(--surface-1); aspect-ratio: 4/3; position: relative; }
+  .hero__art svg { width: 100%; height: 100%; display: block; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 40px; }
+  .card { background: var(--surface-1); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none; transition: border-color .2s, transform .15s; }
+  .card:hover { border-color: var(--gold-line); transform: translateY(-2px); }
+  .card .stage { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); }
+  .card h3 { margin: 0; font-family: var(--font-display); font-size: 17px; font-weight: 500; }
+  .card p { font-size: 14px; color: var(--fg-2); margin: 0; }
+  .card .st { margin-top: auto; align-self: flex-start; }
+  .card--main { grid-column: 1 / -1; background: radial-gradient(110% 120% at 90% 0%, rgba(217,174,82,.25), transparent 55%), var(--surface-1); border-color: var(--gold-line); }
+  .stages { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 20px 0 40px; }
+  .stages div { background: var(--surface-1); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 12px; }
+  .stages b { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--gold-hi); margin-bottom: 4px; }
+  .stages .done { border-color: var(--success); }
+  .stages .part { border-color: var(--warning); }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .stages { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<main class="doc">
+  <nav class="doc-nav"><span class="brand"><i></i>ASIQPAI · Design</span><a href="index.html">Обзор</a><a href="docs/01-ux-audit.html">UX-аудит</a><a href="docs/02-ia-userflow.html">IA и user flow</a><a href="uikit.html">UI Kit</a><a href="docs/03-handoff.html">Handoff</a><a href="docs/04-usability-test.html">Юзабилити-тест</a><a href="prototype.html">Прототип</a></nav>
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Telegram Mini App · UX/UI дизайн-пакет v1.0</p>
+      <h1>ASIQPAI: тёмная студия, золотой сигнал</h1>
+      <p class="lead">Полный результат по ТЗ «Разработка UX/UI-дизайна Telegram Mini App ASIQPAI»: UX-аудит, информационная архитектура и user flow, дизайн-система с UI Kit, 36 экранов и 18 шитов в кликабельном прототипе, handoff-спецификация и план пользовательской проверки.</p>
+      <div class="meta"><span>Дата <b>14.10.2026</b></span><span>Заказчик <b>ASIQPAI</b></span><span>Основание <b>ТЗ от 07.10.2026</b></span></div>
+      <p><a class="btn-link" href="prototype.html" style="display:inline-block;background:var(--gold-grad);color:var(--gold-ink);font-weight:600;padding:14px 22px;border-radius:14px;text-decoration:none">Открыть прототип →</a></p>
+    </div>
+    <div class="hero__art"><svg viewBox="0 0 400 300" id="art"></svg></div>
+  </div>
+
+  <h2 style="margin-top:0;border:0;padding:0">Состав поставки (п. 5.2 ТЗ)</h2>
+  <div class="cards">
+    <a class="card card--main" href="prototype.html"><span class="stage">Этап 4–5 · п. 5.2.4</span><h3>Кликабельный прототип</h3><p>36 экранов, 18 шитов, 7 сквозных сценариев: первая запись MID/BACK/ADLIBS → обработка → WAV, Vocal Slicer и AI Fit, AI Samples, покупка лицензии, кошелёк, публикация. Переключатели для проверки крупного текста, офлайна, пустых состояний и казахских строк; режимы 320 px и Telegram Desktop.</p><span class="st sev sev--ok">готово</span></a>
+    <a class="card" href="docs/01-ux-audit.html"><span class="stage">Этап 1</span><h3>UX-аудит</h3><p>Экспертный аудит по зонам продукта с приоритетами P0–P2, принципы редизайна и чек-лист для аудита живого MVP.</p><span class="st sev sev--p1">предварительный, без доступа к MVP</span></a>
+    <a class="card" href="docs/02-ia-userflow.html"><span class="stage">Этап 2 · п. 5.2.3</span><h3>IA и user flow</h3><p>Карта разделов, навигационная модель, семь пользовательских сценариев с ветвлениями ошибок, матрица состояний.</p><span class="st sev sev--ok">готово</span></a>
+    <a class="card" href="uikit.html"><span class="stage">Этап 3 · п. 5.2.2, 5.2.6</span><h3>UI Kit и правила дизайн-системы</h3><p>Токены, типографика с KZ, сетка, иконки, все компоненты и их состояния живьём, правила использования.</p><span class="st sev sev--ok">UI Kit v1</span></a>
+    <a class="card" href="docs/03-handoff.html"><span class="stage">Этап 6 · п. 5.2.7</span><h3>Handoff для разработчика</h3><p>Состав файлов, именование, интеграция с Telegram WebApp SDK (safe area, BackButton, haptics, deep links), аудио, локализация, чек-лист приёмки.</p><span class="st sev sev--ok">готово</span></a>
+    <a class="card" href="docs/04-usability-test.html"><span class="stage">Этап 5</span><h3>План пользовательской проверки</h3><p>Скринер, 8 задач, метрики (успех, SEQ, SUS), протокол сессии, лист наблюдателя, расписание на две недели.</p><span class="st sev sev--ok">готово</span></a>
+    <a class="card" href="assets/tokens.json"><span class="stage">п. 5.2.5</span><h3>Ассеты и токены</h3><p>tokens.json для Figma Variables, SVG-иконки (assets/export/icons), логотип (assets/export/logo), CSS-исходники дизайн-системы.</p><span class="st sev sev--ok">экспортировано</span></a>
+  </div>
+
+  <h2>Статус по календарному плану</h2>
+  <div class="stages">
+    <div class="done"><b>1 · 0.25 мес</b>Старт и UX-аудит<br><span class="c-3">экспертная часть готова; интервью и аудит MVP после доступа</span></div>
+    <div class="done"><b>2 · 0.25 мес</b>IA и user flow<br><span class="c-3">готово</span></div>
+    <div class="done"><b>3 · 0.5 мес</b>Концепция и Design System<br><span class="c-3">UI Kit v1 в коде; Figma-библиотека после утверждения палитры</span></div>
+    <div class="done"><b>4 · 0.75 мес</b>Ключевые экраны<br><span class="c-3">36 экранов со всеми состояниями</span></div>
+    <div class="part"><b>5 · 0.5 мес</b>Прототип и проверка<br><span class="c-3">прототип готов; тест на 5 пользователях по плану</span></div>
+    <div class="part"><b>6 · 0.25 мес</b>Финализация и handoff<br><span class="c-3">спецификация готова; handoff-сессия по согласованию</span></div>
+  </div>
+
+  <div class="callout"><p><b>Что требуется от Заказчика для завершения (п. 5.1 ТЗ):</b> доступ к актуальному MVP для верификации аудита; бренд-материалы и подтверждение палитры (тёмная + золото принята как базовая); рабочее пространство Figma, куда импортируется UI Kit (html.to.design / Tokens Studio); 5–6 участников для пользовательской проверки или согласие на рекрут.</p></div>
+
+  <div class="footer">ASIQPAI Design Package v1.0 · 14.10.2026 · Шрифты по SIL OFL, иконки собственные, демо-данные вымышленные · Исходники: папка assets/</div>
+</main>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ui.js"></script>
+<script>
+(function(){
+  var A = ASQ, s = '';
+  s += '<defs><radialGradient id="rg" cx="80%" cy="10%" r="90%"><stop offset="0" stop-color="#5a4215"/><stop offset="1" stop-color="#0E0D0B"/></radialGradient></defs><rect width="400" height="300" fill="url(#rg)"/>';
+  var lanes = [['MID','#D9AE52',70],['BACK','#79A6D2',140],['ADLIBS','#D97A9B',210]];
+  lanes.forEach(function(l, li){
+    s += '<rect x="24" y="'+(l[2]-26)+'" width="352" height="56" rx="12" fill="#171613" stroke="'+(li===0?'#D9AE52':'rgba(242,226,190,.08)')+'"/>';
+    s += '<rect x="32" y="'+(l[2]-18)+'" width="3" height="40" rx="1.5" fill="'+l[1]+'"/>';
+    s += '<text x="44" y="'+(l[2]+4)+'" font-family="Onest, sans-serif" font-size="11" font-weight="700" fill="#F4EFE4" letter-spacing="1">'+l[0]+'</text>';
+    for (var i=0;i<52;i++){ var v = 4 + Math.abs(Math.sin(i*0.6+li*2)*14 + A.rand(li*7+i)*10); if (li===1 && i<18) v=1.5; if (li===2 && (i>26&&i<40)) v=1.5; s += '<rect x="'+(104+i*5)+'" y="'+(l[2]+2-v)+'" width="3" height="'+(v*2)+'" rx="1.5" fill="'+l[1]+'" opacity="'+(i<22?0.95:0.4)+'"/>'; }
+  });
+  s += '<line x1="214" y1="30" x2="214" y2="250" stroke="#F4EFE4" stroke-width="1"/><circle cx="214" cy="30" r="4" fill="#F4EFE4"/>';
+  s += '<text x="24" y="282" font-family="JetBrains Mono, monospace" font-size="20" fill="#F4EFE4">0:55<tspan fill="#847E71" font-size="12">.4</tspan></text><text x="376" y="282" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#847E71">142 BPM · F#m · Hook</text>';
+  s += '<text x="356" y="56" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#F0605D" letter-spacing="1">REC</text>';
+  document.getElementById('art').innerHTML = s;
+})();
+</script>
+</body>
+</html>

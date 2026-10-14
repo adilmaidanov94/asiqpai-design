@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASIQPAI Handoff</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="doc.css">
+</head>
+<body>
+<main class="doc">
+  <nav class="doc-nav"><span class="brand"><i></i>ASIQPAI · Design</span><a href="../index.html">Обзор</a><a href="01-ux-audit.html">UX-аудит</a><a href="02-ia-userflow.html">IA и user flow</a><a href="../uikit.html">UI Kit</a><a href="03-handoff.html">Handoff</a><a href="04-usability-test.html">Юзабилити-тест</a><a href="../prototype.html">Прототип</a></nav>
+  <p class="eyebrow">Этап 6 · Финализация и Handoff</p>
+  <h1>Handoff-спецификация для разработчика</h1>
+  <p class="lead">Как перенести дизайн в существующий веб-стек Telegram Mini App (HTML/CSS/JavaScript) без привязки к платным библиотекам. Исходники дизайн-системы уже написаны на CSS и могут подключаться напрямую.</p>
+  <div class="meta"><span>Версия <b>1.0</b></span><span>Дата <b>14.10.2026</b></span><span>Стек <b>HTML / CSS / vanilla JS, Telegram WebApp SDK</b></span><span>Статус <b>к handoff-сессии</b></span></div>
+
+  <div class="toc">
+    <a href="#files">1. Состав файлов</a><a href="#tokens">2. Токены</a><a href="#naming">3. Именование компонентов</a><a href="#telegram">4. Интеграция с Telegram</a><a href="#layout">5. Вёрстка экранов</a>
+    <a href="#audio">6. Запись и аудио</a><a href="#states">7. Состояния и ошибки</a><a href="#i18n">8. Локализация</a><a href="#a11y">9. Доступность</a><a href="#perf">10. Производительность</a><a href="#assets">11. Ассеты</a><a href="#qa">12. Чек-лист приёмки</a>
+  </div>
+
+  <h2 id="files">1. Состав файлов</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Файл</th><th>Назначение</th><th>Подключать в продукт</th></tr>
+    <tr><td>assets/css/tokens.css</td><td>Все дизайн-токены как CSS-переменные на <code>:root</code>. Единственный источник цветов, шрифтов, отступов, радиусов, длительностей.</td><td>Да, первым</td></tr>
+    <tr><td>assets/css/components.css</td><td>UI Kit: кнопки, чипы, поля, списки, карточки, волны, состояния, шиты, тосты. Без привязки к экранам.</td><td>Да</td></tr>
+    <tr><td>assets/css/app.css</td><td>Каркас приложения: апп-бар, таб-бар, мини-плеер, студийные компоненты, экранные блоки. Содержит также стили рамки телефона для прототипа (<code>.phone</code>, <code>.phone__*</code>) — их в продукт не брать.</td><td>Да, кроме секции «Phone frame»</td></tr>
+    <tr><td>assets/js/icons.js</td><td>Набор иконок как SVG-path. Функция <code>ASQ.ic(name)</code> возвращает inline-SVG.</td><td>Да или заменить на спрайт из assets/export/icons</td></tr>
+    <tr><td>assets/js/ui.js</td><td>Роутер прототипа, шиты/диалоги/тосты, процедурные обложки и волны. Логику роутера заменить на продуктовую; функции <code>A.sheet</code>, <code>A.dialog</code>, <code>A.toast</code>, <code>A.wave</code>, <code>A.cover</code> можно переиспользовать.</td><td>Частично</td></tr>
+    <tr><td>assets/js/screens/*.js</td><td>Разметка каждого экрана как строковые шаблоны. Это спецификация структуры DOM и классов: переносить в компоненты продукта 1:1.</td><td>Как референс</td></tr>
+    <tr><td>assets/tokens.json</td><td>Те же токены в JSON (DTCG-подобный формат) для импорта в Figma Variables (Tokens Studio) или генерации тем.</td><td>Для Figma</td></tr>
+    <tr><td>assets/export/icons/*.svg, logo/*.svg</td><td>Иконки 24 px и логотип, готовые к спрайту/PNG/WebP.</td><td>Да</td></tr>
+  </table></div>
+
+  <h2 id="tokens">2. Токены</h2>
+  <p>Правило одно: в коде продукта не должно быть литеральных цветов, размеров шрифта и радиусов. Только <code>var(--token)</code>. Полный список в <a href="../uikit.html#color">UI Kit</a>; ниже группы и как их применять.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Группа</th><th>Токены</th><th>Применение</th></tr>
+    <tr><td>Поверхности</td><td>--bg, --surface-1..3, --line, --line-strong</td><td>Ступени высоты. Карточка на bg = surface-1; шит и поле = surface-2; нажатое/выбранное = surface-3. Обводки только --line/--line-strong.</td></tr>
+    <tr><td>Текст</td><td>--fg, --fg-2, --fg-3, --gold-ink</td><td>Три уровня иерархии. --gold-ink только на золотых заливках.</td></tr>
+    <tr><td>Акцент</td><td>--gold, --gold-hi, --gold-lo, --gold-grad, --gold-wash, --gold-line</td><td>Primary-кнопки: --gold-grad. Активные чипы/карточки: --gold-wash + --gold-line. Золотой текст: --gold-hi (не --gold, он темнее порога AA на surface-2 для мелкого текста).</td></tr>
+    <tr><td>Семантика</td><td>--success/-wash, --warning/-wash, --danger/-wash, --info/-wash, --rec</td><td>Статусы. --rec = --danger, отдельный токен на случай смены.</td></tr>
+    <tr><td>Дорожки</td><td>--trk-mid, --trk-back, --trk-adlibs, --trk-beat</td><td>Только в студии (lane, волны, сегменты обработки).</td></tr>
+    <tr><td>Шрифты</td><td>--font-display, --font-body, --font-mono; --fs-*; --lh-*; --ts</td><td>Размеры умножаются на --ts. При старте читать масштаб системы недоступно в WebView; предлагать переключатель «крупный текст» в настройках, который ставит <code>--ts: 1.3</code> на <code>html</code>.</td></tr>
+    <tr><td>Отступы</td><td>--s-1..--s-12, --gutter</td><td>Шаг 4 px. Боковое поле экрана --gutter = 16 px.</td></tr>
+    <tr><td>Радиусы</td><td>--r-xs..--r-xl, --r-full</td><td>См. правило вложенных радиусов в UI Kit.</td></tr>
+    <tr><td>Размеры</td><td>--touch, --appbar-h, --tabbar-h, --miniplayer-h</td><td>От них считаются нижние отступы прокручиваемых тел экранов.</td></tr>
+    <tr><td>Safe area</td><td>--safe-top, --safe-bottom</td><td>Вычисляются из Telegram <code>safeAreaInset</code>/<code>contentSafeAreaInset</code> с fallback на <code>env()</code>. Подробнее в разделе 4.</td></tr>
+    <tr><td>Движение</td><td>--d-fast, --d-base, --d-slow, --ease-out, --ease-in-out</td><td>При prefers-reduced-motion длительности равны 0.</td></tr>
+  </table></div>
+  <div class="callout"><p><b>Тема.</b> Бренд требует тёмную палитру, поэтому тема фиксированная: <code>color-scheme: dark</code> и собственные цвета независимо от <code>Telegram.WebApp.colorScheme</code>. Из themeParams берём только то, что красит системный хром Telegram: вызываем <code>setHeaderColor('#0E0D0B')</code>, <code>setBackgroundColor('#0E0D0B')</code>, <code>setBottomBarColor('#0E0D0B')</code>, чтобы шапка и нижняя панель клиента не светились белым у пользователей со светлой темой.</p></div>
+
+  <h2 id="naming">3. Именование компонентов</h2>
+  <p>Схема BEM-light: <code>.block</code>, <code>.block__element</code>, <code>.block--modifier</code>, состояния <code>.is-*</code>. Имена совпадают в CSS, в шаблонах прототипа и в слоях Figma (после импорта).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Компонент</th><th>Класс</th><th>Модификаторы</th><th>Состояния</th></tr>
+    <tr><td>Кнопка</td><td>.btn</td><td>--primary --secondary --outline --ghost --danger --sm --lg --block</td><td>:disabled .is-disabled .is-loading :active</td></tr>
+    <tr><td>Иконка-кнопка</td><td>.icon-btn</td><td>--filled --gold --sm --lg</td><td>.icon-btn__dot (индикатор)</td></tr>
+    <tr><td>Кнопка записи</td><td>.rec-btn</td><td>--gold</td><td>.is-recording</td></tr>
+    <tr><td>Чип / бейдж</td><td>.chip / .badge</td><td>chip--sm; badge--gold --ai --success --warning --danger --info --rec</td><td>.is-active :disabled</td></tr>
+    <tr><td>Сегмент / вкладки</td><td>.seg .seg__item / .tabs .tabs__item</td><td>—</td><td>.is-active; data-show + [data-pane]</td></tr>
+    <tr><td>Поле</td><td>.field .field__label .input .textarea .field__hint .field__error</td><td>.search</td><td>.is-error :disabled :focus</td></tr>
+    <tr><td>Переключатель / слайдер</td><td>.switch / .range + .param</td><td>—</td><td>:checked :disabled; --p на .range</td></tr>
+    <tr><td>Список</td><td>.list .li .li__icon .li__body .li__title .li__sub .li__end</td><td>list--plain; li__icon--gold</td><td>:active</td></tr>
+    <tr><td>Карточка</td><td>.card</td><td>--flat --gold --tap</td><td>:active</td></tr>
+    <tr><td>Обложка / аватар</td><td>.cover / .avatar</td><td>cover--sm --md --lg --xl; avatar--ring; --av</td><td>.cover__play</td></tr>
+    <tr><td>Волна / метр / прогресс</td><td>.wave / .meter / .progress / .spinner / .sk</td><td>progress--indeterminate; sk--line --title --circle</td><td>.played, .on .hot .clip</td></tr>
+    <tr><td>Состояние</td><td>.state .state__art .state__title .state__text .state__actions</td><td>--error --success --gold</td><td>—</td></tr>
+    <tr><td>Баннер / тост</td><td>.banner / .toast</td><td>banner--warning --danger --info --gold; toast--success --error --info</td><td>.is-leaving</td></tr>
+    <tr><td>Шит / диалог</td><td>.scrim .sheet .sheet__grip .sheet__head .sheet__title .sheet__body .sheet__actions / .dialog</td><td>—</td><td>.is-leaving</td></tr>
+    <tr><td>Апп-бар / таб-бар</td><td>.appbar .appbar__title .appbar__sub / .tabbar .tabbar__item .tabbar__orb .tabbar__badge</td><td>appbar--home; tabbar__item--studio</td><td>.is-active, aria-current</td></tr>
+    <tr><td>Экран</td><td>.screen .screen__body .footer-actions</td><td>screen--modal; screen__body--notab --player --tight; footer-actions--row</td><td>—</td></tr>
+    <tr><td>Студия</td><td>.transport .lanes .lane .lane__head .lane__wave .lane__ctrls .playhead .fx .fx__row .knob .slicer .slicer__cut .slicer__region .pad-grid .pad</td><td>—</td><td>lane.is-armed .is-empty; lane__ctrl.is-on; pad.is-active .is-empty; slicer__cut.is-sel</td></tr>
+  </table></div>
+
+  <h2 id="telegram">4. Интеграция с Telegram Mini App</h2>
+  <div class="step"><i>01</i><div><b>Инициализация</b><p><code>Telegram.WebApp.ready()</code>, затем <code>expand()</code>. Для студии и плеера запросить <code>requestFullscreen()</code> (Bot API 8.0) и <code>disableVerticalSwipes()</code>, чтобы жест по дорожкам не сворачивал приложение. Отключать fullscreen при выходе из студии.</p></div></div>
+  <div class="step"><i>02</i><div><b>Safe area</b><p>Читать <code>safeAreaInset</code> и <code>contentSafeAreaInset</code>, записывать в <code>--tg-safe-area-inset-*</code> и <code>--tg-content-safe-area-inset-top</code> на <code>html</code>; токены <code>--safe-top/--safe-bottom</code> уже их учитывают. Подписаться на события <code>safeAreaChanged</code>, <code>contentSafeAreaChanged</code>, <code>viewportChanged</code>. Высоту экрана брать из <code>viewportStableHeight</code>, не из 100vh.</p></div></div>
+  <div class="step"><i>03</i><div><b>BackButton</b><p>Показывать на каждом не корневом экране и при открытом шите/диалоге; обработчик вызывает тот же <code>back()</code>/<code>dismiss()</code>, что и стрелка в апп-баре. На корневых вкладках BackButton скрыт. Стрелка в апп-баре остаётся для Desktop/Web, где системной кнопки нет.</p></div></div>
+  <div class="step"><i>04</i><div><b>MainButton</b><p>Не используется для действий экрана: собственный <code>.footer-actions</code> даёт две кнопки, стоимость в кредитах и одинаковое поведение с клавиатурой. Исключение: оплата через Telegram Stars, где <code>openInvoice()</code> сам показывает системную кнопку.</p></div></div>
+  <div class="step"><i>05</i><div><b>Haptics</b><p><code>HapticFeedback.impactOccurred('medium')</code> на старт/стоп записи и на arm дорожки; <code>notificationOccurred('success'|'error')</code> на завершение AI-операции; <code>selectionChanged()</code> на чипах и сегментах.</p></div></div>
+  <div class="step"><i>06</i><div><b>Файлы и чат</b><p>Экспорт WAV отправляется ботом в чат (sendDocument), приложение показывает экран «Трек готов» по событию от бэкенда. Загрузка пользовательских файлов — через <code>&lt;input type="file"&gt;</code> (работает в iOS/Android WebView); голосовые из Telegram принимаются как OGG/Opus.</p></div></div>
+  <div class="step"><i>07</i><div><b>Deep links</b><p><code>t.me/&lt;bot&gt;/app?startapp=b_&lt;beatId&gt;</code> открывает бит; <code>p_&lt;postId&gt;</code> — пост; <code>c_&lt;challengeId&gt;</code> — челлендж; <code>ref_&lt;userId&gt;</code> — приглашение (+100 кредитов). Параметр читается из <code>initDataUnsafe.start_param</code> и обрабатывается после онбординга.</p></div></div>
+  <div class="step"><i>08</i><div><b>Цвета хрома</b><p><code>setHeaderColor</code>, <code>setBackgroundColor</code>, <code>setBottomBarColor</code> = <code>#0E0D0B</code>. Это единственное место, где цвет задаётся литералом: значение берётся из <code>getComputedStyle(document.documentElement).getPropertyValue('--bg')</code>.</p></div></div>
+  <div class="step"><i>09</i><div><b>Закрытие</b><p>Во время записи и AI-операций включать <code>enableClosingConfirmation()</code>; выключать после сохранения дубля или завершения задачи.</p></div></div>
+
+  <h2 id="layout">5. Вёрстка экранов</h2>
+  <p>Каждый экран — <code>section.screen</code> из трёх частей: <code>.appbar</code> (фикс. 56 px), <code>.screen__body</code> (единственная прокручиваемая область, flex-колонка с gap 24) и необязательный <code>.footer-actions</code> или <code>.tabbar</code>. Горизонтальной прокрутки у тела нет; горизонтальные ленты (<code>.hscroll</code>) выходят за gutter отрицательными полями.</p>
+  <pre><code>&lt;section class="screen"&gt;
+  &lt;header class="appbar"&gt;…&lt;/header&gt;
+  &lt;div class="screen__body screen__body--player"&gt;   &lt;!-- --notab: без таб-бара; --player: место под мини-плеер --&gt;
+    &lt;div class="section"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="footer-actions footer-actions--row"&gt;…&lt;/div&gt;   &lt;!-- либо .tabbar --&gt;
+&lt;/section&gt;</code></pre>
+  <ul>
+    <li>Нижний отступ тела = высота таб-бара + мини-плеер + safe-bottom + 24 (уже посчитано в модификаторах).</li>
+    <li>Дети <code>.screen__body</code> имеют <code>flex-shrink: 0</code>, иначе блоки с <code>overflow: hidden</code> схлопываются при нехватке высоты.</li>
+    <li>Ширина &gt; 560 px (Telegram Desktop/Web): контент центрируется колонкой 560 px (<code>.phone--flat</code> правила в app.css показывают, какие элементы ограничивать).</li>
+    <li>Минимальная ширина 320 px: все ряды с кнопками либо переносятся, либо используют <code>.btn--sm</code>; проверено на экранах записи, обработки и кошелька.</li>
+    <li>Вложенность кнопок запрещена (невалидно, ломает DOM). Карточка-ссылка с кнопкой внутри делается как <code>div[role=button]</code> + внутренняя <code>button</code>.</li>
+  </ul>
+
+  <h2 id="audio">6. Запись и аудио: требования к реализации</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Требование</th><th>Как отражено в дизайне</th><th>Техническая заметка</th></tr>
+    <tr><td>Запись в WebView</td><td>Экран mic-denied с инструкцией; баннер про наушники</td><td><code>getUserMedia</code> в Telegram WebView iOS 17+ и Android WebView работает; разрешение запрашивать по нажатию REC, не при открытии студии. Использовать AudioWorklet, буфер 128–256 сэмплов, 48 kHz.</td></tr>
+    <tr><td>Метроном и предотсчёт</td><td>Подсказка «4 клика», hint 4·3·2·1</td><td>Клик генерировать в AudioContext, синхронизировать старт записи с <code>currentTime</code> бита.</td></tr>
+    <tr><td>Автосохранение</td><td>Hero «Продолжить» на Home, бейдж take N</td><td>Каждый дубль пишется в IndexedDB сразу после стопа; при сворачивании приложения состояние студии сохраняется.</td></tr>
+    <tr><td>Индикатор входа</td><td><code>.meter</code> 24 сегмента: зелёный до −12 dB, жёлтый до −3, красный клип</td><td>AnalyserNode, обновление 30 fps через rAF; при скрытой вкладке остановить.</td></tr>
+    <tr><td>Волны</td><td><code>.wave</code> 44–90 столбиков</td><td>Пики считать на сервере или в воркере один раз на дубль; хранить массив 0..1 длиной 200, на клиенте ресемплировать до нужного числа столбиков.</td></tr>
+    <tr><td>Мини-плеер</td><td>Один глобальный плеер, прогресс-линия</td><td>Единственный <code>HTMLAudioElement</code>/AudioContext на приложение; старт только по тапу (политика автоплея).</td></tr>
+    <tr><td>A/B сравнение</td><td>Иконка split в апп-баре экрана обработки, удержание</td><td>pointerdown/pointerup, переключение сухого/обработанного буфера без паузы.</td></tr>
+    <tr><td>Экспорт</td><td>Экран ai-progress с шагами</td><td>Рендер на бэкенде; прогресс по WebSocket/long-poll; на клиенте шаги меняются по событиям, а не по таймеру (в прототипе таймер).</td></tr>
+  </table></div>
+
+  <h2 id="states">7. Состояния и ошибки</h2>
+  <p>Каждый запрос к API проходит через четыре состояния интерфейса; компоненты для них готовы.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Состояние</th><th>Компонент</th><th>Правила</th></tr>
+    <tr><td>loading</td><td><code>.sk</code> скелетоны в форме контента; <code>.btn.is-loading</code>; <code>.progress--indeterminate</code></td><td>Скелетон показывается, если ответ дольше 300 мс. Повторный тап заблокирован.</td></tr>
+    <tr><td>empty</td><td><code>.state</code></td><td>Текст объясняет, почему пусто и что сделать; минимум одно действие.</td></tr>
+    <tr><td>error</td><td><code>.state--error</code>, <code>.banner--danger</code>, <code>.toast--error</code>, <code>.field.is-error</code></td><td>Полноэкранная ошибка только когда экран нельзя показать; иначе баннер/тост. Текст: что случилось + что делать; код ошибки мелким текстом. Кредиты при ошибке не списываются и это написано.</td></tr>
+    <tr><td>success</td><td><code>.state--success</code> или <code>.toast--success</code></td><td>Полноэкранный успех только после покупки и экспорта; остальное тостом.</td></tr>
+    <tr><td>disabled</td><td><code>:disabled</code>, <code>.is-disabled</code></td><td>Непрозрачность 0.38; при тапе по недоступной primary показывать тост с причиной.</td></tr>
+    <tr><td>confirmation</td><td><code>.dialog</code></td><td>Удаление, отмена AI-операции, выход во время записи, платёж.</td></tr>
+    <tr><td>offline</td><td><code>.offline</code> полоса + экран offline</td><td>Полоса на корневых экранах; библиотека и проекты доступны; AI-кнопки disabled с тостом.</td></tr>
+  </table></div>
+
+  <h2 id="i18n">8. Локализация RU / KZ / EN</h2>
+  <ul>
+    <li>Все строки через словарь; ключи совпадают с именем экрана: <code>studio.record.lane.mid</code>.</li>
+    <li>Бюджет длины: KZ до +35%, EN до −10% относительно RU. Кнопки <code>.btn</code> переносят текст на вторую строку при нехватке ширины (line-height 1.1), не обрезают.</li>
+    <li>Числа и валюта через <code>Intl.NumberFormat</code> (ru-RU/kk-KZ/en): пробел-разделитель тысяч, знак ₸ после числа.</li>
+    <li>Казахские буквы ә ғ қ ң ө ұ ү h і покрыты шрифтами Onest и Unbounded (проверено в UI Kit).</li>
+    <li>Таймкоды, BPM, тональности не локализуются и всегда в <code>--font-mono</code>.</li>
+  </ul>
+
+  <h2 id="a11y">9. Доступность</h2>
+  <ul>
+    <li>Контраст: основной текст ≥ 9:1, вторичный ≥ 4.5:1, золото на тёмном 11.7:1 (таблица в UI Kit).</li>
+    <li>Цели касания ≥ 44×44; у лейн-контролов M/S 28×24, но они внутри ряда высотой 68 с зоной нажатия по вертикали всего ряда.</li>
+    <li>Иконки-кнопки имеют <code>aria-label</code>; активная вкладка <code>aria-current="page"</code>; шиты <code>role="dialog" aria-modal</code>; фокус после открытия шита переводится на заголовок.</li>
+    <li>Видимый фокус: <code>:focus-visible</code> золотая обводка 2 px (важно для Desktop Telegram).</li>
+    <li>Цвет не единственный носитель смысла: дорожки подписаны именем, armed имеет метку REC, ошибки имеют иконку и текст.</li>
+    <li><code>prefers-reduced-motion</code> учтён в токенах; пульс REC заменяется статичной красной рамкой.</li>
+  </ul>
+
+  <h2 id="perf">10. Производительность</h2>
+  <ul>
+    <li>CSS: три файла суммарно ≈ 40 КБ без сжатия; без препроцессоров и фреймворков.</li>
+    <li>Шрифты: три семейства, 8 начертаний, <code>display=swap</code>; при необходимости self-host (OFL разрешает) и подгружать только latin + cyrillic.</li>
+    <li>Обложки: процедурный SVG до загрузки изображений; изображения WebP 2× не больше 300 px для плиток, 600 px для плеера.</li>
+    <li>Волны: массив пиков, не аудио; DOM-столбики до 90 штук на элемент, для таймлайна с зумом перейти на canvas.</li>
+    <li>Анимации только transform/opacity; backdrop-filter только на таб-баре.</li>
+  </ul>
+
+  <h2 id="assets">11. Ассеты</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Папка</th><th>Содержимое</th><th>Формат и лицензия</th></tr>
+    <tr><td>assets/export/icons/</td><td>Полный набор иконок, 24 px, stroke 1.75, currentColor</td><td>SVG, собственная отрисовка в стиле Lucide (ISC)</td></tr>
+    <tr><td>assets/export/logo/</td><td>asiqpai-mark.svg (128 px, золотой градиент, под иконку приложения/бота), asiqpai-wordmark.svg</td><td>SVG, передаётся Заказчику; шрифт в wordmark — Unbounded (OFL), для финала перевести в кривые</td></tr>
+    <tr><td>assets/tokens.json</td><td>Токены для Figma Variables / генерации тем</td><td>JSON</td></tr>
+    <tr><td>Шрифты</td><td>Unbounded, Onest, JetBrains Mono</td><td>Google Fonts, SIL Open Font License 1.1, коммерческое использование разрешено</td></tr>
+    <tr><td>Демо-данные</td><td>assets/js/data.js</td><td>Вымышленные артисты и биты; персональных данных нет</td></tr>
+  </table></div>
+  <p>Экспорт PNG/WebP из SVG: <code>rsvg-convert -w 48 icon.svg &gt; icon@2x.png</code> или любой растеризатор; растровые версии в пакет не включены намеренно, чтобы не фиксировать плотность пикселей.</p>
+
+  <h2 id="qa">12. Чек-лист приёмки реализации</h2>
+  <ol>
+    <li>Ни одного литерального цвета/размера шрифта в CSS продукта, кроме цветов хрома Telegram из токена.</li>
+    <li>Экраны прототипа и продукта совпадают по структуре классов (сверка по <code>assets/js/screens/*.js</code>).</li>
+    <li>Все экраны проверены на 320 и 430 px, в Telegram Desktop и при <code>--ts: 1.3</code>.</li>
+    <li>KZ-локаль не ломает кнопки, апп-бар и бейджи.</li>
+    <li>BackButton Telegram работает на каждом не корневом экране и закрывает шиты.</li>
+    <li>Safe-area: таб-бар и footer-actions не перекрываются индикатором «домой»; апп-бар не уходит под кнопку закрытия Telegram.</li>
+    <li>Каждая AI-кнопка показывает стоимость; списание только после успеха; ошибка объясняет и предлагает повтор.</li>
+    <li>Запись: разрешение микрофона по REC; дубль сохраняется локально до отправки; сворачивание не теряет дубль.</li>
+    <li>Деструктивные действия через диалог; тосты не дольше 3 с; одновременно не более двух.</li>
+    <li>Loading/empty/error/success/disabled/confirmation присутствуют на всех экранах из матрицы состояний (<a href="02-ia-userflow.html">IA и user flow</a>).</li>
+  </ol>
+
+  <div class="footer">ASIQPAI · Handoff v1.0 · 14.10.2026 · Handoff-сессия до 2 часов проводится после приёмки этапа 6 (п. 3.1.12 ТЗ).</div>
+</main>
+</body>
+</html>

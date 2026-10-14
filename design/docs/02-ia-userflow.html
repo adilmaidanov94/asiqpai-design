@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASIQPAI · Информационная архитектура и user flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="doc.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:'dark', themeVariables:{primaryColor:'#201E1A', primaryTextColor:'#F4EFE4', primaryBorderColor:'#D9AE52', lineColor:'#847E71', secondaryColor:'#171613', tertiaryColor:'#0E0D0B', fontFamily:'Onest, sans-serif'}});</script>
+</head>
+<body>
+<main class="doc">
+<nav class="doc-nav"><span class="brand"><i></i>ASIQPAI · Design</span><a href="../index.html">Обзор</a><a href="01-ux-audit.html">UX-аудит</a><a href="02-ia-userflow.html">IA и user flow</a><a href="../uikit.html">UI Kit</a><a href="03-handoff.html">Handoff</a><a href="04-usability-test.html">Юзабилити-тест</a><a href="../prototype.html">Прототип</a></nav>
+
+<p class="eyebrow">Документ 02 · Этап 1</p>
+<h1>Информационная архитектура и пользовательские сценарии</h1>
+<p class="lead">Предлагаемая структура разделов ASIQPAI, модель навигации в рамках Telegram Mini App и семь сквозных сценариев с проверкой состояний и тупиков. Структура реализована в кликабельном прототипе; идентификаторы экранов совпадают с ним.</p>
+<div class="meta"><span>Версия <b>1.0</b></span><span>Дата <b>14.10.2026</b></span><span>Статус <b>черновик к согласованию</b></span><span>Этап по календарному плану <b>1. Аудит и IA</b></span><span>Связанные документы <b>01 UX-аудит, 03 Handoff</b></span></div>
+
+<div class="toc">
+<a href="#sitemap">1. Карта разделов</a>
+<a href="#navigation">2. Навигационная модель</a>
+<a href="#flows">3. Пользовательские сценарии F1–F7</a>
+<a href="#matrix">4. Матрица состояний</a>
+<a href="#screens">5. Список экранов и шитов прототипа</a>
+</div>
+
+<h2 id="sitemap">1. Карта разделов</h2>
+<p>Корень приложения состоит из пяти табов. Центральный таб «Студия» выделен золотой кнопкой, потому что главная задача продукта (записать трек на бит) должна быть достижима одним касанием с любого экрана. Кошелёк и профиль не занимают таб: это сервисные разделы, в которые заходят по необходимости, и они открываются из app-bar Главной (аватар, баланс) и из профиля. AI Samples и Vocal Slicer находятся внутри хаба Студии и в быстрых действиях Главной.</p>
+<figure>
+<pre class="mermaid">
+graph TD
+  TG["Telegram · startapp"] --> ON["onboarding"]
+  ON --> GOAL["goal"]
+  GOAL --> HOME
+  TAB["Таб-бар"] --> HOME["Главная · home"]
+  TAB --> MUSIC["Музыка · music"]
+  TAB --> STUDIO["Студия · studio"]
+  TAB --> COMM["Сообщество · community"]
+  TAB --> LIB["Библиотека · library"]
+  HOME --> WALLET["Кошелёк · wallet"]
+  WALLET --> WH["История · wallet-history"]
+  WALLET --> PLANS["Тарифы · plans"]
+  HOME --> PROFILE["Профиль · profile"]
+  PROFILE --> SETTINGS["Настройки · settings"]
+  HOME --> NOTIF["Уведомления · notifications"]
+  MUSIC --> BEAT["Бит · beat"]
+  BEAT --> LICENSE["Лицензия · license"]
+  LICENSE --> PS["purchase-success"]
+  MUSIC --> PLAYER["Плеер · player"]
+  STUDIO --> BP["Выбор бита · beat-picker"]
+  BP --> REC["Запись · studio-record"]
+  REC --> FX["Обработка · studio-fx"]
+  FX --> EXP["Экспорт · export"]
+  EXP --> ES["export-success"]
+  STUDIO --> SLICER["Vocal Slicer · slicer"]
+  STUDIO --> SAMPLES["AI Samples · samples"]
+  SAMPLES --> PACK["Пак · pack"]
+  SAMPLES --> SGEN["Генератор · samples-gen"]
+  SGEN --> SRES["Результат · samples-result"]
+  SAMPLES --> SMINE["Мои сэмплы · samples-mine"]
+  COMM --> POST["Пост · post"]
+  ES --> POST
+  BEAT --> REC
+</pre>
+<figcaption>Карта разделов. Сплошные стрелки показывают иерархию и основные переходы; служебные состояния (loading, offline, mic-denied, low-credits, maintenance, ai-progress, ai-error) не привязаны к разделу и вызываются из любого места.</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Раздел</th><th>Экраны</th><th>Точки входа</th><th>Назначение</th></tr></thead>
+<tbody>
+<tr><td>Главная</td><td><code>home</code>, <code>notifications</code></td><td>Таб 1; запуск приложения после онбординга; deep link по умолчанию</td><td>Продолжить последний проект, быстрые действия, рекомендованные биты, короткая лента</td></tr>
+<tr><td>Музыка</td><td><code>music</code>, <code>beat</code>, <code>player</code>, <code>license</code>, <code>purchase-success</code></td><td>Таб 2; «Подобрать бит» из студии; deep link <code>startapp=beat_ID</code>; ссылки из постов</td><td>Каталог битов, треков и продюсеров; покупка лицензии; прослушивание</td></tr>
+<tr><td>Студия</td><td><code>studio</code>, <code>beat-picker</code>, <code>studio-record</code>, <code>studio-fx</code>, <code>export</code>, <code>export-success</code>, <code>slicer</code>, <code>samples</code>, <code>pack</code>, <code>samples-gen</code>, <code>samples-result</code>, <code>samples-mine</code></td><td>Таб 3 (центр); «Записать на бит» со страницы бита; «Продолжить» на Главной; «Открыть проект» из библиотеки; deep link <code>startapp=rec_BEATID</code></td><td>Линейная запись из четырёх шагов и инструменты AI</td></tr>
+<tr><td>Сообщество</td><td><code>community</code>, <code>post</code></td><td>Таб 4; публикация с экрана успешного экспорта; deep link <code>startapp=post_ID</code></td><td>Лента, челленджи, поиск фита, комментарии</td></tr>
+<tr><td>Библиотека</td><td><code>library</code></td><td>Таб 5; «В библиотеку» после экспорта и покупки</td><td>Проекты, экспорты, купленные биты, сэмплы; офлайн-копии</td></tr>
+<tr><td>Кошелёк</td><td><code>wallet</code>, <code>wallet-history</code>, <code>plans</code></td><td>Баланс в app-bar Главной; строка в профиле; экран <code>low-credits</code>; шит <code>buy-credits</code> из любого AI-инструмента</td><td>Баланс в тенге, AI-кредитах и Stars; пополнение; тарифы; история</td></tr>
+<tr><td>Профиль</td><td><code>profile</code>, <code>settings</code></td><td>Аватар в app-bar Главной</td><td>Статистика, публикации, тариф, приглашения, настройки, язык, удаление аккаунта</td></tr>
+<tr><td>Онбординг</td><td><code>onboarding</code>, <code>goal</code></td><td>Первый запуск; повторно из настроек «Показать введение»</td><td>Ценность продукта, выбор цели, имя</td></tr>
+<tr><td>Сервисные экраны</td><td><code>loading</code>, <code>offline</code>, <code>mic-denied</code>, <code>low-credits</code>, <code>maintenance</code>, <code>ai-progress</code>, <code>ai-error</code></td><td>Вызываются системой из любого раздела</td><td>Единый шаблон: иллюстрация, одна фраза, одно действие</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="navigation">2. Навигационная модель</h2>
+<h3>2.1 Три уровня</h3>
+<ul>
+<li><b>Табы.</b> Пять корневых экранов. Переключение таба не сбрасывает стек другого таба: пользователь может уйти в Музыку послушать бит и вернуться в Студию на тот же шаг записи. Повторное касание активного таба возвращает к его корню.</li>
+<li><b>Стек.</b> Экраны внутри таба открываются поверх корня (push). Глубина ограничена здравым смыслом: бит → лицензия → успех; студия → запись → обработка → экспорт → успех. Экран успеха заменяет предыдущие шаги в стеке, чтобы «назад» не вёл в уже оплаченную форму или уже выполненный экспорт.</li>
+<li><b>Шиты.</b> Нижние листы для коротких действий, не меняющих контекст: фильтры, выбор пресета, список дублей, громкость бита, пополнение, покупка кредитов, контекстные меню «ещё». Шит закрывается свайпом вниз, тапом по скриму и кнопкой BackButton Telegram.</li>
+</ul>
+<figure>
+<pre class="mermaid">
+flowchart LR
+  subgraph TABS["Корень: таб-бар"]
+    H["home"]
+    M["music"]
+    S["studio"]
+    C["community"]
+    L["library"]
+  end
+  S -->|"push"| R["studio-record"]
+  R -->|"push"| F["studio-fx"]
+  F -->|"push"| E["export"]
+  E -->|"replace"| ES["export-success"]
+  R -.->|"sheet"| T["takes"]
+  F -.->|"sheet"| P["preset"]
+  M -->|"push"| B["beat"]
+  B -->|"push"| LI["license"]
+  LI -->|"replace"| PS["purchase-success"]
+  LI -.->|"sheet"| BC["buy-credits"]
+  H -->|"push"| W["wallet"]
+  H -->|"push"| PR["profile"]
+</pre>
+<figcaption>Семантика переходов: push добавляет экран в стек таба, replace заменяет вершину стека (экраны успеха), sheet открывает лист поверх текущего экрана без изменения стека.</figcaption>
+</figure>
+
+<h3>2.2 Политика BackButton и MainButton Telegram</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Ситуация</th><th>BackButton Telegram</th><th>MainButton Telegram</th><th>Собственные элементы</th></tr></thead>
+<tbody>
+<tr><td>Корень таба</td><td>Скрыт</td><td>Скрыт</td><td>Таб-бар, app-bar</td></tr>
+<tr><td>Экран в стеке</td><td>Показан, выполняет pop (то же, что стрелка в app-bar)</td><td>Показан, если на экране одно главное действие и нет собственного футера: <code>license</code>, <code>export</code>, <code>plans</code>, <code>goal</code></td><td>Собственный футер там, где нужны два действия или индикатор: <code>beat</code>, <code>studio-fx</code></td></tr>
+<tr><td>Открыт шит</td><td>Показан, закрывает шит</td><td>Скрыт (действие внутри шита)</td><td>Кнопка внутри шита</td></tr>
+<tr><td>Идёт запись</td><td>Показан, но вызывает подтверждение «Остановить запись?»</td><td>Скрыт: транспорт не выражается одной кнопкой</td><td>Транспорт REC / стоп / предотсчёт</td></tr>
+<tr><td>Идёт AI-операция или рендер</td><td>Показан, вызывает подтверждение отмены</td><td>Скрыт</td><td>Кнопка «Отменить» на экране прогресса</td></tr>
+<tr><td>Закрытие приложения</td><td>Не используется</td><td>Не используется</td><td><code>enableClosingConfirmation()</code> включается на время записи, рендера и неоплаченной формы</td></tr>
+</tbody>
+</table>
+</div>
+<p>Кнопка «назад» внутри интерфейса и BackButton Telegram всегда ведут в одно и то же место. На Android системная кнопка «назад» обрабатывается как BackButton. История браузера не используется для навигации: состояние стека живёт в приложении и восстанавливается после перезапуска из локального хранилища.</p>
+
+<h3>2.3 Deep links</h3>
+<p>Параметр <code>startapp</code> разбирается при запуске до рендера первого экрана, чтобы пользователь не видел мигание Главной. Если онбординг не пройден, он показывается один раз, а затем выполняется переход по ссылке.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Параметр</th><th>Куда ведёт</th><th>Откуда приходит</th></tr></thead>
+<tbody>
+<tr><td><code>startapp=beat_ID</code></td><td><code>music</code> → <code>beat</code></td><td>Пост в канале продюсера, кнопка «поделиться» на странице бита</td></tr>
+<tr><td><code>startapp=rec_BEATID</code></td><td><code>studio</code> → <code>studio-record</code> с выбранным битом</td><td>Челлендж в сообществе, рассылка бота</td></tr>
+<tr><td><code>startapp=post_ID</code></td><td><code>community</code> → <code>post</code></td><td>Кнопка «поделиться» у поста</td></tr>
+<tr><td><code>startapp=pack_ID</code></td><td><code>studio</code> → <code>samples</code> → <code>pack</code></td><td>Анонс пака</td></tr>
+<tr><td><code>startapp=invite_CODE</code></td><td><code>onboarding</code> с бонусом, затем <code>home</code></td><td>Приглашение из профиля</td></tr>
+<tr><td><code>startapp=wallet</code></td><td><code>home</code> → <code>wallet</code></td><td>Уведомление бота о зачислении</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="flows">3. Пользовательские сценарии</h2>
+<p>Для каждого сценария указаны цель, точки входа, шаги, покрытие шести обязательных состояний из ТЗ и проверка на тупики: из любого шага должен быть выход либо вперёд, либо назад без потери данных.</p>
+
+<h3>F1. Первая запись: от открытия до WAV</h3>
+<p><b>Цель:</b> пользователь без обучения записывает MID, BACK и ADLIBS на выбранный бит, обрабатывает, прослушивает и сохраняет WAV. Это сценарий 3.1.2 из ТЗ и основа юзабилити-теста.<br><b>Точки входа:</b> hero на <code>home</code>, центральный таб <code>studio</code>, «Записать на бит» на <code>beat</code>, deep link <code>rec_</code>.</p>
+<figure>
+<pre class="mermaid">
+flowchart LR
+  H["home · Записать"] --> BP["beat-picker"]
+  BP --> MIC{"Доступ к микрофону"}
+  MIC -- "отказ" --> MD["mic-denied"]
+  MD -- "повторить" --> MIC
+  MIC -- "есть" --> REC["studio-record"]
+  REC -- "сворачивание" --> AS["автосохранение дубля"]
+  AS --> REC
+  REC -- "Далее" --> FX["studio-fx"]
+  FX --> AI{"AI-пресет"}
+  AI -- "нет" --> EXP["export"]
+  AI -- "да" --> CR{"Кредитов хватает"}
+  CR -- "нет" --> LC["low-credits"]
+  LC --> BUY["buy-credits"]
+  BUY --> CR
+  CR -- "да" --> NET{"Сеть"}
+  NET -- "нет" --> OFF["offline"]
+  OFF -- "повторить" --> NET
+  NET -- "есть" --> P["ai-progress"]
+  P --> RES{"Результат"}
+  RES -- "ошибка" --> ERR["ai-error"]
+  ERR -- "повторить" --> P
+  ERR -- "без AI" --> EXP
+  RES -- "успех" --> EXP
+  EXP --> ES["export-success"]
+  ES --> PUB["publish · community"]
+  ES --> LIB["library · Экспорты"]
+</pre>
+<figcaption>F1. Ветки отказа в микрофоне, нехватки кредитов, отсутствия сети и ошибки AI возвращают в основной путь без потери проекта.</figcaption>
+</figure>
+<div class="step"><i>01</i><div><b>Выбор бита</b><p><code>beat-picker</code>: недавние, купленные, рекомендованные; поиск ведёт в каталог с возвратом. Состояния: loading-скелетон, empty «Пока нет битов: подобрать в Музыке», offline «показаны купленные биты».</p></div></div>
+<div class="step"><i>02</i><div><b>Запись</b><p><code>studio-record</code>: дорожка BEAT и три вокальные дорожки; арминг тапом по дорожке, подпись «Пишем: MID»; предупреждение о наушниках при первом дубле; предотсчёт; REC в зоне большого пальца; индикатор входа. Дубли хранятся в шите <code>takes</code>. Выход во время записи вызывает confirmation.</p></div></div>
+<div class="step"><i>03</i><div><b>Обработка</b><p><code>studio-fx</code>: AI-пресет и слайдер силы, цепочка FX раскрывается по запросу, A/B удерживанием. Цена AI-пресета показана на кнопке. Кнопка «Далее» неактивна (disabled) пока идёт рендер превью.</p></div></div>
+<div class="step"><i>04</i><div><b>Прослушивание и экспорт</b><p><code>export</code>: прослушивание результата целиком, формат WAV/MP3, что (микс/стемы), куда. Рендер с прогрессом и предупреждением «не сворачивайте». <code>export-success</code> предлагает публикацию и фит.</p></div></div>
+<p><b>Проверка тупиков:</b> каждый шаг имеет «назад» на предыдущий шаг с сохранением данных; экран успеха заменяет стек, «назад» ведёт в хаб Студии. Прерванный проект появляется на Главной как «Продолжить» с указанием шага.</p>
+
+<h3>F2. Vocal Slicer и AI Fit</h3>
+<p><b>Цель:</b> нарезать записанный или загруженный вокал на фрагменты и подогнать тайминг и тон под бит.<br><b>Точки входа:</b> хаб <code>studio</code>, быстрые действия <code>home</code>, контекстное меню дорожки <code>track-more</code> («Открыть в Slicer»).</p>
+<ol>
+<li><code>slicer</code>, вкладка «Нарезка»: источник (дорожка проекта, файл, запись), автоматические маркеры, ручная правка. Empty: «Выберите источник». Loading: анализ аудио.</li>
+<li>Вкладка «AI Fit»: оценка до/после (отклонение по таймингу и тону), слайдеры силы тайминга и тона, кнопка «Применить · 50 кредитов». Disabled при нулевой силе обоих слайдеров.</li>
+<li>Проверка кредитов → <code>low-credits</code> при нехватке → шит <code>buy-credits</code> → возврат на вкладку с сохранёнными настройками.</li>
+<li><code>ai-progress</code> с шагами (анализ, тайминг, тон, рендер) и отменой; кредиты списываются только при успехе.</li>
+<li>Успех: результат на вкладке с A/B и кнопкой «В проект»; ошибка: <code>ai-error</code> с повтором или возвратом к исходнику.</li>
+<li>Вкладка «Пэды»: фрагменты раскладываются на пэды для сохранения как сэмплы в библиотеку.</li>
+</ol>
+<p><b>Состояния:</b> loading, empty, error, success, disabled, confirmation (при замене дорожки в проекте). <b>Тупики:</b> нет; отмена на любом шаге возвращает исходный материал.</p>
+
+<h3>F3. AI Samples</h3>
+<p><b>Цель:</b> получить набор сэмплов (чопы, адлибы, one-shot) из своего голоса, проекта или файла, при необходимости подогнанный под бит.<br><b>Точки входа:</b> хаб <code>studio</code>, быстрые действия <code>home</code>, карточка пака из ленты, deep link <code>pack_</code>.</p>
+<figure>
+<pre class="mermaid">
+flowchart LR
+  S["samples · паки"] --> G["samples-gen"]
+  S --> PK["pack"]
+  PK --> SAVE1["сохранить в библиотеку"]
+  G --> SRC{"Источник"}
+  SRC -- "записать" --> MIC{"Микрофон"}
+  MIC -- "отказ" --> MD["mic-denied"]
+  MD --> SRC
+  MIC -- "есть" --> OPT
+  SRC -- "из проекта" --> OPT["что сделать · под бит"]
+  SRC -- "файл" --> OPT
+  OPT --> CR{"100 кредитов есть"}
+  CR -- "нет" --> LC["low-credits"]
+  LC --> CR
+  CR -- "да" --> P["ai-progress"]
+  P -- "ошибка" --> E["ai-error"]
+  E -- "повторить" --> P
+  E -- "изменить параметры" --> G
+  P -- "успех" --> R["samples-result · 16 пэдов"]
+  R --> PICK["выбрать и сохранить"]
+  PICK --> MINE["samples-mine"]
+  R -- "ничего не выбрано" --> G
+</pre>
+<figcaption>F3. Генератор как форма из трёх вопросов; результат можно выборочно сохранить или перегенерировать.</figcaption>
+</figure>
+<p><b>Состояния:</b> loading (сетка паков, анализ источника), empty (<code>samples-mine</code> без сэмплов ведёт в генератор), error (<code>ai-error</code>), success (сохранено, тост с переходом в библиотеку), disabled (кнопка генерации до выбора источника), confirmation (удаление сэмпла через <code>sample-more</code>). <b>Тупики:</b> нет; результат без выбора возвращает в генератор с сохранёнными параметрами.</p>
+
+<h3>F4. Покупка лицензии на бит</h3>
+<p><b>Цель:</b> выбрать тип лицензии и оплатить удобным способом, не выходя из контекста бита.<br><b>Точки входа:</b> футер <code>beat</code>, попытка экспорта проекта на некупленном бите (переход на <code>license</code> с возвратом в экспорт).</p>
+<figure>
+<pre class="mermaid">
+flowchart LR
+  B["beat"] --> L["license"]
+  L --> T{"Basic · Premium · Exclusive"}
+  T --> PM{"Способ оплаты"}
+  PM -- "Stars" --> INV["Telegram invoice"]
+  PM -- "Кошелёк" --> WB{"Баланса хватает"}
+  WB -- "нет" --> TU["topup"]
+  TU --> WB
+  WB -- "да" --> CONF["подтверждение"]
+  PM -- "Карта" --> CARD["платёжная форма"]
+  CARD --> IC
+  INV --> IC{"invoiceClosed"}
+  IC -- "paid" --> OK["purchase-success"]
+  IC -- "cancelled" --> L
+  IC -- "failed" --> ERR["ошибка оплаты"]
+  ERR -- "повторить" --> PM
+  CONF --> OK
+  OK --> REC["Записать на бит"]
+  OK --> LIB["library · Биты"]
+</pre>
+<figcaption>F4. Отмена нативного инвойса возвращает на экран лицензии с сохранённым выбором; успех заменяет стек.</figcaption>
+</figure>
+<p><b>Состояния:</b> loading (ожидание ответа платёжной системы, кнопка заблокирована), empty (нет сохранённых способов), error (платёж отклонён, с повтором), success (<code>purchase-success</code>), disabled (кнопка «Оплатить» до выбора лицензии), confirmation (списание с кошелька). <b>Тупики:</b> экран успеха не позволяет вернуться в форму оплаты; «назад» ведёт на бит с обновлённым статусом «куплено».</p>
+
+<h3>F5. Пополнение и кредиты</h3>
+<p><b>Цель:</b> пополнить баланс в тенге или купить AI-кредиты и понять, на что они тратятся.<br><b>Точки входа:</b> баланс в app-bar <code>home</code>, строка в <code>profile</code>, экран <code>low-credits</code> из любого AI-инструмента, кнопка «Пополнить» в <code>wallet</code>.</p>
+<ol>
+<li><code>wallet</code>: карточка баланса (тенге, AI-кредиты, Stars), кнопки «Пополнить» и «Купить кредиты», тариф, последние операции.</li>
+<li>Шит <code>topup</code>: сумма (пресеты и ввод), способ (Stars, карта). Шит <code>buy-credits</code>: пакеты кредитов с ценой за кредит и подсказкой «хватит на N операций AI Fit».</li>
+<li>Оплата через инвойс или форму; обработка <code>invoiceClosed</code>; тост успеха и обновлённый баланс.</li>
+<li><code>plans</code>: Free / Pro / Studio с явной выгодой по кредитам; подтверждение подписки.</li>
+<li><code>wallet-history</code>: операции с типом (пополнение, AI Fit, сэмплы, мастеринг, покупка бита), фильтр по типу.</li>
+</ol>
+<p><b>Состояния:</b> loading (скелетон баланса), empty (<code>wallet</code> без операций с подсказкой, на что тратятся кредиты), error (платёж не прошёл), success, disabled (кнопка до выбора суммы), confirmation (подписка, автопродление). <b>Тупики:</b> из <code>low-credits</code> после покупки пользователь возвращается в инструмент, который вызвал экран, с сохранёнными параметрами.</p>
+
+<h3>F6. Публикация и фит</h3>
+<p><b>Цель:</b> опубликовать результат в сообществе и получить предложение совместной работы.<br><b>Точки входа:</b> <code>export-success</code>, кнопка «Опубликовать» на экспортах в <code>library</code>, кнопка «+» в <code>community</code>.</p>
+<ol>
+<li>Шит <code>publish</code>: обложка, подпись, теги, отметка «Ищу фит», видимость. Disabled до выбора трека.</li>
+<li>Загрузка с прогрессом; при потере сети публикация ставится в очередь и отправляется при восстановлении, карточка помечена «Ожидает сети».</li>
+<li><code>community</code>: пост появляется в ленте и в сегменте «Ищут фит», если отмечено.</li>
+<li><code>post</code>: комментарии, лайки, кнопка «Фит» открывает предложение (сообщение автору через бота).</li>
+<li>Удаление поста через <code>post-more</code> с подтверждением.</li>
+</ol>
+<p><b>Состояния:</b> loading (лента, отправка), empty (лента для нового пользователя с подборкой челленджей), error (публикация не удалась, повтор из библиотеки), success (тост с переходом к посту), disabled, confirmation (удаление). <b>Тупики:</b> нет; неотправленная публикация остаётся в библиотеке с кнопкой «Повторить».</p>
+
+<h3>F7. Онбординг</h3>
+<p><b>Цель:</b> за 30 секунд объяснить ценность, узнать цель пользователя и привести его к первому действию.<br><b>Точки входа:</b> первый запуск; deep link <code>invite_</code>; «Показать введение» в настройках.</p>
+<ol>
+<li><code>onboarding</code>: три слайда ценности (записать трек на бит, AI-обработка и сэмплы, сообщество и фиты). Кнопка «Пропустить» на каждом слайде.</li>
+<li><code>goal</code>: выбор цели из четырёх (записать трек, нарезать вокал, сделать сэмплы, найти бит); имя предзаполнено из Telegram и редактируется. MainButton «Начать».</li>
+<li><code>home</code> с hero, соответствующим выбранной цели; если был deep link, выполняется переход по нему.</li>
+</ol>
+<p><b>Состояния:</b> loading (сплэш до получения <code>initData</code>), error (нет сети при первом запуске: <code>offline</code> с повтором), success (переход на Главную), disabled (кнопка «Начать» до выбора цели не блокируется: цель по умолчанию «Записать трек»), confirmation не требуется. <b>Тупики:</b> нет; онбординг можно пропустить, цель меняется в профиле.</p>
+
+<h2 id="matrix">4. Матрица состояний</h2>
+<p>Отмечены состояния, реализованные в кликабельном прототипе. Пустая ячейка означает, что состояние не применимо или будет добавлено на Этапе 4; такие случаи перечислены под таблицей.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Экран</th><th>Loading</th><th>Empty</th><th>Error</th><th>Success</th><th>Disabled</th><th>Confirmation</th></tr></thead>
+<tbody>
+<tr><td><code>onboarding</code>, <code>goal</code></td><td>✓ сплэш</td><td>–</td><td>✓ offline</td><td>✓ переход</td><td>–</td><td>–</td></tr>
+<tr><td><code>home</code></td><td>✓ скелетон</td><td>✓ нет проектов</td><td>✓ офлайн-баннер</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td><code>music</code></td><td>✓ скелетон</td><td>✓ пустой поиск</td><td>✓ офлайн</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td><code>beat</code>, <code>player</code></td><td>✓ волна</td><td>✓ нет похожих</td><td>✓ не загрузился</td><td>✓ куплено</td><td>✓ «Записать» до загрузки</td><td>–</td></tr>
+<tr><td><code>license</code>, <code>purchase-success</code></td><td>✓ ожидание оплаты</td><td>–</td><td>✓ отклонено</td><td>✓</td><td>✓ до выбора</td><td>✓ списание</td></tr>
+<tr><td><code>beat-picker</code></td><td>✓</td><td>✓ нет битов</td><td>✓ офлайн</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td><code>studio-record</code></td><td>✓ загрузка бита</td><td>✓ нет дублей</td><td>✓ mic-denied</td><td>✓ дубль сохранён</td><td>✓ REC без дорожки</td><td>✓ выход, удаление дубля</td></tr>
+<tr><td><code>studio-fx</code></td><td>✓ рендер превью</td><td>–</td><td>✓ ai-error</td><td>✓ пресет применён</td><td>✓ «Далее» при рендере</td><td>✓ сброс цепочки</td></tr>
+<tr><td><code>export</code>, <code>export-success</code></td><td>✓ рендер</td><td>–</td><td>✓ не хватило места / сеть</td><td>✓</td><td>✓ до выбора формата</td><td>✓ отмена рендера</td></tr>
+<tr><td><code>slicer</code></td><td>✓ анализ</td><td>✓ нет источника</td><td>✓ ai-error</td><td>✓ применено</td><td>✓ нулевая сила</td><td>✓ замена дорожки</td></tr>
+<tr><td><code>samples</code>, <code>pack</code>, <code>samples-mine</code></td><td>✓ сетка</td><td>✓ нет своих</td><td>✓ офлайн</td><td>✓ сохранено</td><td>–</td><td>✓ удаление</td></tr>
+<tr><td><code>samples-gen</code>, <code>samples-result</code></td><td>✓ ai-progress</td><td>✓ ничего не выбрано</td><td>✓ ai-error</td><td>✓</td><td>✓ до источника</td><td>✓ перегенерация</td></tr>
+<tr><td><code>ai-progress</code>, <code>ai-error</code></td><td>✓ шаги</td><td>–</td><td>✓</td><td>✓ переход далее</td><td>–</td><td>✓ отмена</td></tr>
+<tr><td><code>community</code>, <code>post</code></td><td>✓ скелетон</td><td>✓ пустая лента</td><td>✓ офлайн, очередь</td><td>✓ опубликовано</td><td>✓ publish до трека</td><td>✓ удаление поста</td></tr>
+<tr><td><code>wallet</code>, <code>wallet-history</code>, <code>plans</code></td><td>✓ скелетон</td><td>✓ пустой кошелёк</td><td>✓ платёж не прошёл</td><td>✓ зачислено</td><td>✓ до суммы</td><td>✓ подписка</td></tr>
+<tr><td><code>library</code></td><td>✓ скелетон</td><td>✓ по вкладкам</td><td>✓ файл недоступен</td><td>–</td><td>–</td><td>✓ удаление проекта</td></tr>
+<tr><td><code>profile</code>, <code>settings</code></td><td>✓</td><td>✓ нет публикаций</td><td>✓ сохранение не удалось</td><td>✓ сохранено</td><td>–</td><td>✓ удаление аккаунта, выход</td></tr>
+<tr><td><code>notifications</code></td><td>✓</td><td>✓ нет уведомлений</td><td>–</td><td>–</td><td>–</td><td>✓ очистить всё</td></tr>
+<tr><td>Сервисные: <code>loading</code>, <code>offline</code>, <code>mic-denied</code>, <code>low-credits</code>, <code>maintenance</code></td><td>✓</td><td>–</td><td>✓</td><td>–</td><td>–</td><td>–</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout">
+<p><b>Не реализовано в прототипе и запланировано на Этап 4:</b> error для <code>notifications</code> (не загрузился список), success для <code>home</code> и <code>music</code> (тост после добавления в избранное), confirmation для <code>music</code> (удаление из избранного). Состояние «нет сети» для экранов записи сведено к баннеру, так как запись работает локально.</p>
+</div>
+
+<h2 id="screens">5. Список экранов и шитов прототипа</h2>
+<p>Идентификаторы используются в прототипе, в именах фреймов Figma и в документе Handoff. Полноэкранные состояния и шиты перечислены отдельно.</p>
+<h3>5.1 Экраны</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Группа</th><th>Идентификаторы</th></tr></thead>
+<tbody>
+<tr><td>Вход</td><td><code>onboarding</code>, <code>goal</code>, <code>loading</code></td></tr>
+<tr><td>Главная</td><td><code>home</code>, <code>notifications</code></td></tr>
+<tr><td>Музыка</td><td><code>music</code>, <code>beat</code>, <code>player</code>, <code>license</code>, <code>purchase-success</code></td></tr>
+<tr><td>Студия: запись</td><td><code>studio</code>, <code>beat-picker</code>, <code>studio-record</code>, <code>studio-fx</code>, <code>export</code>, <code>export-success</code></td></tr>
+<tr><td>Студия: инструменты</td><td><code>slicer</code>, <code>samples</code>, <code>pack</code>, <code>samples-gen</code>, <code>samples-result</code>, <code>samples-mine</code></td></tr>
+<tr><td>AI, общие</td><td><code>ai-progress</code>, <code>ai-error</code></td></tr>
+<tr><td>Сообщество</td><td><code>community</code>, <code>post</code></td></tr>
+<tr><td>Кошелёк</td><td><code>wallet</code>, <code>wallet-history</code>, <code>plans</code></td></tr>
+<tr><td>Библиотека</td><td><code>library</code></td></tr>
+<tr><td>Профиль</td><td><code>profile</code>, <code>settings</code></td></tr>
+<tr><td>Сервисные</td><td><code>offline</code>, <code>maintenance</code>, <code>mic-denied</code>, <code>low-credits</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3>5.2 Шиты</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Контекст</th><th>Шиты</th><th>Назначение</th></tr></thead>
+<tbody>
+<tr><td>Музыка</td><td><code>filters</code>, <code>share</code></td><td>Фильтры каталога по жанру, BPM, тональности, цене; поделиться ссылкой на бит или пост</td></tr>
+<tr><td>Студия: запись</td><td><code>track-more</code>, <code>studio-settings</code>, <code>takes</code>, <code>beat-vol</code>, <code>project-more</code></td><td>Действия с дорожкой, настройки студии (предотсчёт, метроном, мониторинг), список дублей, громкость бита, действия с проектом</td></tr>
+<tr><td>Студия: обработка</td><td><code>preset</code>, <code>fx-param</code>, <code>presets-pick</code></td><td>Описание AI-пресета, точная настройка параметра слайдером, выбор пресета из списка</td></tr>
+<tr><td>Экспорт и сообщество</td><td><code>publish</code>, <code>post-more</code></td><td>Форма публикации, действия с постом</td></tr>
+<tr><td>Сэмплы</td><td><code>sample-more</code></td><td>Переименовать, в проект, удалить</td></tr>
+<tr><td>Кошелёк</td><td><code>topup</code>, <code>buy-credits</code></td><td>Пополнение баланса, покупка пакетов кредитов</td></tr>
+<tr><td>Библиотека и профиль</td><td><code>lib-sort</code>, <code>edit-profile</code>, <code>lang</code></td><td>Сортировка, редактирование профиля, выбор языка RU / KZ / EN</td></tr>
+</tbody>
+</table>
+</div>
+<p>Итого: 36 экранов и 18 шитов. Каждый экран в Handoff получает карточку с перечнем состояний из матрицы раздела 4, правилом для BackButton и MainButton из раздела 2 и ссылками на компоненты UI Kit.</p>
+
+<div class="footer">ASIQPAI · UX/UI-дизайн Telegram Mini App · Документ 02 «Информационная архитектура и user flow» · версия 1.0 от 14.10.2026 · Структура может быть уточнена по итогам аудита живого MVP (документ 01, раздел 5).</div>
+</main>
+</body>
+</html>

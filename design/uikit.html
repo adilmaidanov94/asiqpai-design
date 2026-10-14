@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASIQPAI UI Kit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="docs/doc.css">
+<style>
+  body { font-size: 15px; }
+  .doc { max-width: 1080px; }
+  .demo { background: var(--surface-1); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; --gutter: 20px; }
+  .demo--col { flex-direction: column; align-items: stretch; }
+  .demo--phone { max-width: 390px; }
+  .demo__label { width: 100%; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3); }
+  .spec { font-size: 13px; color: var(--fg-2); margin: 0 0 24px; }
+  .spec code { font-size: 12px; }
+  .type-row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .type-row small { font-family: var(--font-mono); font-size: 11px; color: var(--fg-3); }
+  .space-row { display: flex; align-items: flex-end; gap: 12px; }
+  .space-row i { display: block; background: var(--gold-wash); border: 1px solid var(--gold-line); border-radius: 4px; }
+  .radius-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .radius-row i { width: 64px; height: 64px; background: var(--surface-2); border: 1px solid var(--line-strong); display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); }
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+  .icon-grid div { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; border-radius: 10px; background: var(--surface-2); font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); overflow: hidden; }
+  .icon-grid .ic { --ic: 22px; color: var(--fg); }
+  .contrast { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .contrast div { padding: 14px; border-radius: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+  .contrast small { font-family: var(--font-mono); font-size: 11px; opacity: 0.8; }
+  .grid-demo { position: relative; height: 90px; background: var(--surface-2); border-radius: 12px; overflow: hidden; }
+  .grid-demo i { position: absolute; top: 0; bottom: 0; background: var(--gold-wash); border-inline: 1px dashed var(--gold-line); }
+  .overlay-demo { position: relative; height: 420px; width: 100%; max-width: 390px; border-radius: 24px; overflow: hidden; background: var(--bg); border: 1px solid var(--line-strong); --safe-bottom: 0px; --safe-top: 0px; }
+  .overlay-demo .sheet, .overlay-demo .dialog, .overlay-demo .scrim { animation: none; }
+  .overlay-demo .tabbar { position: absolute; }
+  .lane-demo { position: relative; }
+</style>
+</head>
+<body>
+<main class="doc">
+  <nav class="doc-nav"><span class="brand"><i></i>ASIQPAI · Design</span><a href="index.html">Обзор</a><a href="docs/01-ux-audit.html">UX-аудит</a><a href="docs/02-ia-userflow.html">IA и user flow</a><a href="uikit.html">UI Kit</a><a href="docs/03-handoff.html">Handoff</a><a href="docs/04-usability-test.html">Юзабилити-тест</a><a href="prototype.html">Прототип</a></nav>
+  <p class="eyebrow">Этап 3 · Визуальная концепция и Design System</p>
+  <h1>UI Kit и правила дизайн-системы</h1>
+  <p class="lead">Живая галерея компонентов ASIQPAI. Всё, что здесь показано, рендерится тем же CSS, что и прототип: <code>tokens.css</code>, <code>components.css</code>, <code>app.css</code>. Если компонент выглядит иначе в продукте, расхождение считается ошибкой реализации.</p>
+  <div class="meta"><span>Версия <b>1.0</b></span><span>Дата <b>14.10.2026</b></span><span>Статус <b>UI Kit v1, к согласованию</b></span><span>Тема <b>тёмная, фиксированная</b></span></div>
+
+  <div class="toc">
+    <a href="#concept">Визуальная концепция</a><a href="#color">Цвет</a><a href="#type">Типографика</a><a href="#layout">Сетка, отступы, радиусы</a><a href="#icons">Иконки</a>
+    <a href="#buttons">Кнопки</a><a href="#chips">Чипы и бейджи</a><a href="#forms">Поля и контролы</a><a href="#lists">Списки и карточки</a><a href="#media">Обложки и волны</a>
+    <a href="#nav">Навигация</a><a href="#studio">Студийные компоненты</a><a href="#states">Состояния</a><a href="#overlays">Шиты, диалоги, тосты</a><a href="#motion">Движение</a><a href="#rules">Правила использования</a>
+  </div>
+
+  <h2 id="concept">Визуальная концепция: «тёмная студия, золотой сигнал»</h2>
+  <p>Интерфейс строится как затемнённая аппаратная: тёплые почти чёрные поверхности, на которых золото выполняет одну роль — показывает путь сигнала. Золотом окрашены главное действие экрана, активная (armed) дорожка, прогресс и текущее состояние. Всё остальное остаётся нейтральным. Поэтому пользователь всегда знает, что сейчас «горит».</p>
+  <div class="grid">
+    <div class="tile"><h4>Одно золото на экран</h4><p>На экране один primary-элемент. Второй золотой объект допустим только если он сообщает состояние (armed, playing), а не просит действия.</p></div>
+    <div class="tile"><h4>Поверхности, а не линии</h4><p>Иерархия строится ступенями фона (bg → surface-1 → surface-2 → surface-3). Обводки прозрачно-тёплые и почти не видны.</p></div>
+    <div class="tile"><h4>Дорожки имеют цвет</h4><p>MID золото, BACK голубой, ADLIBS розовый, BEAT серый. Цвета дорожек не используются нигде, кроме студии.</p></div>
+    <div class="tile"><h4>Крупные цели</h4><p>Минимальная цель касания 44 px, REC 76 px, основные кнопки 48–56 px. Основные действия в зоне большого пальца.</p></div>
+  </div>
+
+  <h2 id="color">Цвет</h2>
+  <p class="spec">Все цвета заданы как CSS-переменные в <code>tokens.css</code>. Нейтрали имеют тёплый сдвиг в сторону золота; чистых серых нет. Семантические цвета (success/warning/danger/info) не пересекаются с акцентом.</p>
+  <div class="grid">
+    <div class="tile"><h4>Поверхности</h4>
+      <div class="swatch"><i style="background:var(--bg)"></i>bg · фон приложения<code>#0E0D0B</code></div>
+      <div class="swatch"><i style="background:var(--surface-1)"></i>surface-1 · карточки<code>#171613</code></div>
+      <div class="swatch"><i style="background:var(--surface-2)"></i>surface-2 · шиты, поля<code>#201E1A</code></div>
+      <div class="swatch"><i style="background:var(--surface-3)"></i>surface-3 · нажатое<code>#2A2823</code></div>
+    </div>
+    <div class="tile"><h4>Текст</h4>
+      <div class="swatch"><i style="background:var(--fg)"></i>fg · основной<code>#F4EFE4</code></div>
+      <div class="swatch"><i style="background:var(--fg-2)"></i>fg-2 · вторичный<code>#B9B2A3</code></div>
+      <div class="swatch"><i style="background:var(--fg-3)"></i>fg-3 · подписи<code>#847E71</code></div>
+      <div class="swatch"><i style="background:var(--gold-ink)"></i>gold-ink · на золоте<code>#1A1408</code></div>
+    </div>
+    <div class="tile"><h4>Золото</h4>
+      <div class="swatch"><i style="background:var(--gold-hi)"></i>gold-hi · текст, подсветка<code>#F0CF7E</code></div>
+      <div class="swatch"><i style="background:var(--gold)"></i>gold · база<code>#D9AE52</code></div>
+      <div class="swatch"><i style="background:var(--gold-lo)"></i>gold-lo · тень градиента<code>#A67C2B</code></div>
+      <div class="swatch"><i style="background:var(--gold-grad)"></i>gold-grad · primary<code>135° hi→gold→lo</code></div>
+    </div>
+    <div class="tile"><h4>Семантика и дорожки</h4>
+      <div class="swatch"><i style="background:var(--success)"></i>success<code>#4CC38A</code></div>
+      <div class="swatch"><i style="background:var(--warning)"></i>warning<code>#F2A93B</code></div>
+      <div class="swatch"><i style="background:var(--danger)"></i>danger / rec<code>#F0605D</code></div>
+      <div class="swatch"><i style="background:var(--info)"></i>info / BACK<code>#79A6D2</code></div>
+      <div class="swatch"><i style="background:var(--trk-adlibs)"></i>ADLIBS<code>#D97A9B</code></div>
+    </div>
+  </div>
+  <h3>Контраст (WCAG 2.1)</h3>
+  <div class="contrast">
+    <div style="background:var(--bg);color:var(--fg)">fg на bg<small>17.4 : 1 · AAA</small></div>
+    <div style="background:var(--bg);color:var(--fg-2)">fg-2 на bg<small>9.0 : 1 · AAA</small></div>
+    <div style="background:var(--surface-1);color:var(--fg-3)">fg-3 на surface-1<small>4.6 : 1 · AA</small></div>
+    <div style="background:var(--gold-grad);color:var(--gold-ink)">gold-ink на золоте<small>9.8 : 1 · AAA</small></div>
+    <div style="background:var(--bg);color:var(--gold-hi)">gold-hi на bg<small>11.7 : 1 · AAA</small></div>
+    <div style="background:var(--surface-2);color:var(--danger)">danger на surface-2<small>4.9 : 1 · AA</small></div>
+  </div>
+  <p class="spec">fg-3 используется только для подписей размером от 12 px и не используется для одиночных слов-действий. Мелкий текст 10–11 px (метки дорожек, бейджи) всегда полужирный и на контрастной подложке.</p>
+
+  <h2 id="type">Типографика</h2>
+  <p class="spec">Три гарнитуры: <b>Unbounded</b> для заголовков и крупных цифр (характер бренда, широкая, читается на тёмном), <b>Onest</b> для текста (ровная, с полной кириллицей, казахские символы ә ғ қ ң ө ұ ү h і), <b>JetBrains Mono</b> для таймкодов, BPM, цен и кодов. Все три на Google Fonts (SIL OFL). Шкала умножается на <code>--ts</code> при системном увеличении текста.</p>
+  <div class="demo demo--col" style="gap:0">
+    <div class="type-row"><small>display · 30/1.15 · 600</small><span class="t-display">Запиши трек прямо в Telegram</span></div>
+    <div class="type-row"><small>h1 · 24/1.15 · 600</small><span class="t-h1">Night Drive — take 3</span></div>
+    <div class="type-row"><small>h2 · 19/1.3 · 500</small><span class="t-h2">Биты недели</span></div>
+    <div class="type-row"><small>h3 · 16/1.3 · 600 Onest</small><span class="t-h3">Цепочка эффектов</span></div>
+    <div class="type-row"><small>body · 15/1.47</small><span class="t-body">Vocal Slicer режет дубли на фразы, AI Fit выравнивает тайминг и тон. Ты решаешь, насколько сильно.</span></div>
+    <div class="type-row"><small>sm · 13/1.4</small><span class="t-sm c-2">Dias Beats · 142 BPM · F#m · 3 дорожки</span></div>
+    <div class="type-row"><small>xs · 12/1.35</small><span class="t-xs c-3">Спишется 50 кредитов после успешного результата</span></div>
+    <div class="type-row"><small>label · 11 · caps</small><span class="t-label">Баланс</span></div>
+    <div class="type-row"><small>mono · 12 · tabular</small><span class="t-mono">0:55.4 · 142 BPM · −14 LUFS · 9 900 ₸</span></div>
+    <div class="type-row"><small>KZ / EN</small><span class="t-body">Түнгі жол — үшінші дубль (қара нұсқа) · Night Drive — take 3</span></div>
+  </div>
+  <p class="spec">Запас по длине: все текстовые блоки авто-ширины, строка в кнопке не превышает 60% ширины экрана при RU и укладывается при +35% (KZ). Для однострочных элементов списка используется <code>.clamp-1</code>, для описаний <code>.clamp-2</code>. Жёстко заданной ширины у текстов нет.</p>
+
+  <h2 id="layout">Сетка, отступы, радиусы</h2>
+  <p class="spec">Экранная сетка: 4 колонки, боковое поле 16 px, межколонник 12 px (на 320 px колонка 65 px). Контент шириной более 560 px в Telegram Desktop центрируется колонкой 560 px. Базовый шаг отступов 4 px.</p>
+  <div class="demo demo--col">
+    <span class="demo__label">Сетка 390 px</span>
+    <div class="grid-demo"><i style="left:16px;width:78px"></i><i style="left:106px;width:78px"></i><i style="left:196px;width:78px"></i><i style="left:286px;width:78px"></i></div>
+    <span class="demo__label">Шаг отступов</span>
+    <div class="space-row">
+      <div><i style="width:4px;height:4px"></i><small class="t-mono c-3">4</small></div><div><i style="width:8px;height:8px"></i><small class="t-mono c-3">8</small></div><div><i style="width:12px;height:12px"></i><small class="t-mono c-3">12</small></div><div><i style="width:16px;height:16px"></i><small class="t-mono c-3">16</small></div><div><i style="width:20px;height:20px"></i><small class="t-mono c-3">20</small></div><div><i style="width:24px;height:24px"></i><small class="t-mono c-3">24</small></div><div><i style="width:32px;height:32px"></i><small class="t-mono c-3">32</small></div><div><i style="width:40px;height:40px"></i><small class="t-mono c-3">40</small></div><div><i style="width:48px;height:48px"></i><small class="t-mono c-3">48</small></div>
+    </div>
+    <span class="demo__label">Радиусы</span>
+    <div class="radius-row"><i style="border-radius:var(--r-xs)">xs 6</i><i style="border-radius:var(--r-sm)">sm 10</i><i style="border-radius:var(--r-md)">md 14</i><i style="border-radius:var(--r-lg)">lg 20</i><i style="border-radius:var(--r-xl)">xl 28</i><i style="border-radius:var(--r-full)">full</i></div>
+  </div>
+  <p class="spec">Правило радиусов: кнопки и поля md, карточки lg, hero и шиты xl, чипы и аватары full. Вложенный радиус = внешний минус отступ (карточка 20 с отступом 16 → обложка 4…6, округляем до xs 6).</p>
+
+  <h2 id="icons">Иконки</h2>
+  <p class="spec">Собственный набор в стиле Lucide (ISC): сетка 24 px, штрих 1.75, скруглённые концы. Размеры применения: 16 (внутри бейджей), 20 (списки), 22 (по умолчанию), 24 (таб-бар), 28–40 (состояния). Иконки монохромные и берут цвет из <code>currentColor</code>. Экспорт: <code>assets/export/icons/*.svg</code>.</p>
+  <div class="icon-grid" id="icon-grid"></div>
+
+  <h2 id="buttons">Кнопки</h2>
+  <p class="spec"><code>.btn</code> высота 48, <code>.btn--lg</code> 56, <code>.btn--sm</code> 36. Primary один на экран. Деструктивное действие всегда через диалог подтверждения. Состояние загрузки заменяет текст спиннером и блокирует повторный тап.</p>
+  <div class="demo">
+    <button class="btn btn--primary">Открыть студию</button><button class="btn btn--secondary">Вторичная</button><button class="btn btn--outline">Контурная</button><button class="btn btn--ghost">Призрачная</button><button class="btn btn--danger">Удалить</button>
+  </div>
+  <div class="demo">
+    <button class="btn btn--primary btn--lg">Крупная 56</button><button class="btn btn--primary btn--sm">Малая 36</button><button class="btn btn--primary" disabled>Недоступна</button><button class="btn btn--primary is-loading">Загрузка</button><button class="btn btn--secondary">С иконкой <span class="btn__meta">50</span></button>
+  </div>
+  <div class="demo">
+    <button class="icon-btn" aria-label="Иконка"></button><button class="icon-btn icon-btn--filled" aria-label="Заливка"></button><button class="icon-btn icon-btn--gold" aria-label="Золото"></button><button class="icon-btn icon-btn--lg icon-btn--filled" aria-label="Крупная"></button><button class="icon-btn icon-btn--sm icon-btn--filled" aria-label="Малая"></button><button class="icon-btn" aria-label="С точкой"><span class="icon-btn__dot"></span></button>
+    <button class="rec-btn" aria-label="Запись"><i></i></button><button class="rec-btn is-recording" aria-label="Идёт запись"><i></i></button><button class="rec-btn rec-btn--gold" aria-label="Запись сэмпла"><i></i></button>
+  </div>
+
+  <h2 id="chips">Чипы, бейджи, сегменты, вкладки</h2>
+  <div class="demo">
+    <button class="chip is-active">Все</button><button class="chip">Trap</button><button class="chip">Qazaq Pop</button><button class="chip chip--sm">F#m</button><button class="chip" disabled>Недоступно</button>
+  </div>
+  <div class="demo">
+    <span class="badge">Черновик</span><span class="badge badge--gold">ТОП недели</span><span class="badge badge--ai">AI</span><span class="badge badge--success">FREE</span><span class="badge badge--warning">Без обработки</span><span class="badge badge--danger">Ошибка</span><span class="badge badge--info">офлайн</span><span class="badge badge--rec">REC</span>
+    <span class="kv"><b>142</b>BPM</span><span class="kv"><b>F#m</b></span>
+  </div>
+  <div class="demo demo--col demo--phone">
+    <div class="seg"><button class="seg__item is-active">Биты</button><button class="seg__item">Треки</button><button class="seg__item">Продюсеры</button></div>
+    <div class="tabs"><button class="tabs__item is-active">Проекты</button><button class="tabs__item">Экспорты</button><button class="tabs__item">Биты</button><button class="tabs__item">Сэмплы</button></div>
+  </div>
+  <p class="spec">Сегмент переключает представления одного набора данных (до 4 пунктов). Вкладки с подчёркиванием — разделы внутри экрана (до 5, прокручиваются). Чипы — фильтры; активный чип золотой.</p>
+
+  <h2 id="forms">Поля и контролы</h2>
+  <div class="demo demo--col demo--phone">
+    <div class="field"><label class="field__label" for="k-in">Название</label><input class="input" id="k-in" value="Night Drive (demo)"><span class="field__hint">Видно в сообществе и в чате бота</span></div>
+    <div class="field is-error"><label class="field__label" for="k-err">Ник</label><input class="input" id="k-err" value="armank"><span class="field__error">Ник уже занят. Попробуй armank_music</span></div>
+    <div class="field"><label class="field__label" for="k-dis">Недоступно</label><input class="input" id="k-dis" disabled value="Только в плане Pro"></div>
+    <div class="search"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input class="input" id="k-search" placeholder="Бит, продюсер, BPM, тональность"></div>
+    <div class="field"><label class="field__label" for="k-ta">Подпись</label><textarea class="textarea" id="k-ta" placeholder="Расскажи о треке"></textarea></div>
+    <label class="row row--between"><span>Мониторинг в наушниках</span><span class="switch"><input type="checkbox" checked id="k-sw1"></span></label>
+    <label class="row row--between"><span>Шумоподавление</span><span class="switch"><input type="checkbox" id="k-sw2"></span></label>
+    <div class="param"><div class="param__head"><span>Сила AI-обработки</span><span class="param__value">70%</span></div><input class="range" type="range" min="0" max="100" value="70" style="--p:70%" id="k-rg"><div class="row row--between t-xs c-3"><span>Естественно</span><span>Жёстко</span></div></div>
+    <div class="row"><button class="knob" style="--a:60%" aria-label="Autotune"><b>60</b></button><button class="knob" style="--a:25%" aria-label="Reverb"><b>25</b></button><span class="t-sm c-3">Крутилка: тап открывает шит с параметрами, свайп по вертикали меняет значение.</span></div>
+  </div>
+
+  <h2 id="lists">Списки и карточки</h2>
+  <div class="demo demo--col demo--phone">
+    <div class="list">
+      <button class="li"><div class="li__icon li__icon--gold"><svg class="ic" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM16 3H6a2 2 0 0 0-2 2v2"/></svg></div><div class="li__body"><span class="li__title">Кошелёк</span><span class="li__sub">18 500 ₸ · 1 240 кредитов</span></div><span class="li__end">›</span></button>
+      <label class="li"><div class="li__icon"><svg class="ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10 21a2 2 0 0 0 4 0"/></svg></div><div class="li__body"><span class="li__title">Уведомления</span><span class="li__sub">AI-задачи, фиты, челленджи</span></div><span class="switch"><input type="checkbox" checked id="k-sw3"></span></label>
+      <label class="li"><input type="radio" name="k-r" checked style="accent-color:var(--gold);width:20px;height:20px"><div class="li__body"><span class="li__title">WAV 24-bit / 48 kHz</span><span class="li__sub">Без потерь · ≈ 41 МБ</span></div></label>
+    </div>
+    <div class="card">Карточка <code>.card</code>: surface-1, обводка line, радиус lg, отступ 16.</div>
+    <div class="card card--gold">Карточка <code>.card--gold</code>: для одного главного объекта экрана (продолжить проект, челлендж, рекомендованный план).</div>
+    <div class="card card--flat">Карточка <code>.card--flat</code>: прозрачная, только обводка. Для зон загрузки файлов (пунктир).</div>
+    <div class="grid-2"><div class="stat card"><span class="stat__value">1 240</span><span class="stat__label">AI-кредитов</span></div><div class="stat card"><span class="stat__value c-success">+3 640 ₸</span><span class="stat__label">роялти за октябрь</span></div></div>
+  </div>
+
+  <h2 id="media">Обложки, волны, индикаторы</h2>
+  <div class="demo">
+    <div class="cover cover--sm" id="cv1"></div><div class="cover cover--md" id="cv2"></div><div class="cover cover--lg" id="cv3"></div>
+    <div class="avatar">AK</div><div class="avatar avatar--ring" style="--av:56px">AW</div>
+  </div>
+  <div class="demo demo--col demo--phone">
+    <div id="wv1" style="--wh:40px"></div>
+    <div id="wv2" style="--wh:28px;--wc:var(--trk-back);--wpc:var(--trk-back)"></div>
+    <div class="progress"><div class="progress__bar" style="--p:62%"></div></div>
+    <div class="progress progress--indeterminate"><div class="progress__bar"></div></div>
+    <div class="row"><span class="t-label">Вход</span><div class="meter grow"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on hot"></i><i class="on hot"></i><i class="on hot"></i><i></i><i></i><i></i><i></i></div><span class="t-mono c-3">−6 dB</span></div>
+    <div class="row"><div class="spinner"></div><div class="spinner" style="--sz:32px"></div><span class="sk sk--line" style="width:40%"></span><span class="sk sk--title"></span><span class="sk sk--circle" style="width:36px;height:36px"></span></div>
+  </div>
+  <p class="spec">Волна рисуется столбиками (<code>.wave i</code>), проигранная часть золотая или цветом дорожки. Обложки без изображения генерируются процедурно из hue бита, чтобы каталог не выглядел пустым до загрузки картинок.</p>
+
+  <h2 id="nav">Навигация</h2>
+  <div class="demo demo--col demo--phone" style="padding:0;overflow:hidden">
+    <div style="position:relative;height:76px;--safe-bottom:0px"><div id="tb-demo"></div></div>
+  </div>
+  <div class="demo demo--col demo--phone" style="padding:0;overflow:hidden">
+    <div id="ab-demo"></div>
+    <div id="ab-demo2"></div>
+  </div>
+  <p class="spec">Таб-бар: 5 пунктов, центральный — Студия в золотом «орбе» (46 px), приподнят на 18 px. Полупрозрачный фон с размытием. Апп-бар 56 px: назад слева, заголовок по центру (Unbounded 19), до двух действий справа; на корневых экранах заголовок слева и бренд-марка. Telegram BackButton дублирует стрелку назад на всех не корневых экранах; MainButton не используется — вместо него собственный <code>.footer-actions</code>, чтобы кнопка не перекрывалась системной клавиатурой и работала одинаково в iOS/Android/Desktop.</p>
+
+  <h2 id="studio">Студийные компоненты</h2>
+  <div class="demo demo--col demo--phone">
+    <div class="transport"><div class="transport__time"><span class="badge badge--rec" style="vertical-align:middle;margin-right:8px">REC</span>0:55<small>.4</small></div><div class="transport__meta"><span>142 BPM</span><span>·</span><span>4/4</span><span>·</span><span>Hook · такт 33</span></div></div>
+    <div class="lanes" id="lanes-demo"></div>
+    <div class="fx"><div class="fx__row"><span class="switch"><input type="checkbox" checked id="k-fx1"></span><div class="fx__name">Autotune<small>ключ F#m · скорость 60%</small></div><button class="knob" style="--a:60%"><b>60</b></button></div><div class="fx__row is-off"><span class="switch"><input type="checkbox" id="k-fx2"></span><div class="fx__name">Reverb<small>Plate · 1.4 s</small></div><button class="knob" style="--a:25%"><b>25</b></button></div></div>
+    <div class="slicer" id="slicer-demo"></div>
+    <div class="pad-grid"><button class="pad is-active"><span>1</span><small>chop</small></button><button class="pad"><span>2</span><small>adlib</small></button><button class="pad"><span>3</span><small>shot</small></button><button class="pad is-empty"><span>+</span></button></div>
+  </div>
+  <p class="spec">Дорожка (<code>.lane</code>): цветная левая кромка, имя, подпись, волна, M/S. Armed-состояние: обводка цветом дорожки, лёгкая заливка, метка REC. Пустая дорожка: пунктирная зона с подсказкой. Плейхед общий для всех дорожек. Транспорт: таймкод моно 34 px, под ним BPM / размер / текущий раздел бита.</p>
+
+  <h2 id="states">Состояния экранов</h2>
+  <p class="spec">Шесть обязательных состояний по ТЗ: loading, empty, error, success, disabled, confirmation. Блок <code>.state</code> един для empty/error/success/offline, отличается только иконкой и модификатором цвета.</p>
+  <div class="grid">
+    <div class="tile" style="padding:0"><div class="state"><div class="state__art"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h3 class="state__title">Ничего не нашли</h3><p class="state__text">Попробуй другой жанр или сними фильтры.</p><div class="state__actions"><button class="btn btn--secondary">Сбросить фильтры</button></div></div></div>
+    <div class="tile" style="padding:0"><div class="state state--error"><div class="state__art"><svg class="ic" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div><h3 class="state__title">Не получилось обработать</h3><p class="state__text">Кредиты не списаны, дубли на месте.</p><div class="state__actions"><button class="btn btn--primary">Повторить</button></div></div></div>
+    <div class="tile" style="padding:0"><div class="state state--success"><div class="state__art"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg></div><h3 class="state__title">Трек готов</h3><p class="state__text">WAV отправлен в чат бота.</p><div class="state__actions"><button class="btn btn--primary">Опубликовать</button></div></div></div>
+    <div class="tile" style="padding:0"><div class="state state--gold"><div class="state__art"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg></div><h3 class="state__title">Не хватает кредитов</h3><p class="state__text">Нужно 50, на балансе 20.</p><div class="state__actions"><button class="btn btn--primary">Купить кредиты</button></div></div></div>
+  </div>
+  <div class="demo demo--col demo--phone">
+    <div class="banner banner--warning"><svg class="ic" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><div class="banner__body"><b>Лицензия Basic не куплена</b>Публикация доступна после покупки лицензии.</div></div>
+    <div class="banner banner--info"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><div class="banner__body">Запись без наушников даст эхо от динамика.</div></div>
+    <div class="banner banner--gold"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg><div class="banner__body"><b>1 240 AI-кредитов</b>AI Fit — 50, генерация — 100, мастеринг — 80.</div></div>
+    <div class="offline" style="border-radius:8px">Нет соединения — показываем сохранённые данные</div>
+    <div class="gen-steps"><div class="gen-step is-done"><i>✓</i>Анализ сетки бита</div><div class="gen-step is-active"><i></i>Выравнивание тайминга</div><div class="gen-step"><i></i>Коррекция тона</div></div>
+  </div>
+
+  <h2 id="overlays">Шиты, диалоги, тосты</h2>
+  <div class="demo" style="gap:20px;align-items:flex-start">
+    <div class="overlay-demo">
+      <div class="scrim"></div>
+      <div class="sheet"><div class="sheet__grip"></div><div class="sheet__head"><h2 class="sheet__title">Фильтры</h2><button class="icon-btn" aria-label="Закрыть">✕</button></div><div class="sheet__body"><div class="param"><div class="param__head"><span>BPM</span><span class="param__value">80 – 160</span></div><input class="range" type="range" value="50" style="--p:50%" id="k-rg2"></div><label class="row row--between"><span>Только бесплатные</span><span class="switch"><input type="checkbox" id="k-sw4"></span></label></div><div class="sheet__actions"><button class="btn btn--primary btn--lg">Показать 14 битов</button></div></div>
+    </div>
+    <div class="overlay-demo">
+      <div class="scrim"></div>
+      <div class="dialog"><div class="state__art" style="margin:0 auto 4px;width:64px;height:64px;border-radius:20px;--ic:28px;color:var(--danger);background:var(--danger-wash)"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></div><h2 class="dialog__title">Удалить дубль?</h2><p class="dialog__text">Вернуть запись будет нельзя.</p><div class="dialog__actions"><button class="btn btn--secondary">Отмена</button><button class="btn btn--danger">Удалить</button></div></div>
+      <div class="toast-stack" style="top:12px"><div class="toast toast--success"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg><span>Дубль 2 сохранён на MID</span></div><div class="toast toast--error"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg><span>Нет доступа к микрофону</span></div></div>
+    </div>
+  </div>
+  <p class="spec">Шит: до 88% высоты, скролл внутри тела, действия закреплены снизу с учётом safe-area; закрывается тапом по скриму, свайпом вниз и Telegram BackButton. Диалог: только для подтверждений и блокирующих ошибок, не более двух кнопок, деструктивная справа и красная. Тост: 2.6 с, сверху, не перекрывает апп-бар действий, максимум два одновременно.</p>
+
+  <h2 id="motion">Движение</h2>
+  <div class="table-wrap"><table><tr><th>Токен</th><th>Длительность</th><th>Кривая</th><th>Где</th></tr>
+  <tr><td>d-fast</td><td>120 ms</td><td>ease-out</td><td>нажатие кнопок (scale 0.97), переключение чипов</td></tr>
+  <tr><td>d-base</td><td>200 ms</td><td>ease-out</td><td>переход экрана (сдвиг 14 px + fade), тосты, диалоги</td></tr>
+  <tr><td>d-slow</td><td>320 ms</td><td>ease-out</td><td>выезд шита снизу, прогресс-бары</td></tr>
+  <tr><td>pulse-rec</td><td>1.4 s loop</td><td>linear</td><td>кольцо вокруг REC во время записи</td></tr>
+  <tr><td>eq</td><td>1.6 s loop</td><td>ease-in-out</td><td>декоративные столбики hero</td></tr>
+  </table></div>
+  <p class="spec">При <code>prefers-reduced-motion</code> все длительности обнуляются, пульс и эквалайзер отключаются. Анимации не несут смысла без статики: любое состояние читается на стоп-кадре.</p>
+
+  <h2 id="rules">Правила использования</h2>
+  <ol>
+    <li><b>Один primary.</b> На экране одна золотая кнопка. Если нужны два равных действия, второе — <code>btn--secondary</code>.</li>
+    <li><b>Деньги и кредиты всегда видны до действия.</b> Кнопка AI-операции показывает стоимость (<code>.btn__meta</code>); списание только после успеха; об этом сказано текстом.</li>
+    <li><b>Деструктивное = диалог.</b> Удаление дубля, проекта, аккаунта, отмена AI-операции.</li>
+    <li><b>Нет тупиков.</b> Каждый empty/error-экран имеет минимум одно действие, ведущее дальше, и путь назад.</li>
+    <li><b>Текстовый бюджет.</b> Макет проверяется в RU, KZ (+35%) и при масштабе текста 130%. Обрезка через clamp допустима только во вторичных строках списков.</li>
+    <li><b>Зона большого пальца.</b> Главное действие и REC в нижней трети экрана; апп-бар только для навигации и редких действий.</li>
+    <li><b>Цвета дорожек только в студии.</b> Вне студии BACK-голубой и ADLIBS-розовый не используются.</li>
+    <li><b>Состояния до красоты.</b> Новый экран сначала проектируется в loading/empty/error, потом в happy path.</li>
+  </ol>
+
+  <div class="footer">ASIQPAI · UI Kit v1.0 · 14.10.2026 · Исходники: <code>assets/css/tokens.css</code>, <code>components.css</code>, <code>app.css</code>, <code>assets/tokens.json</code> · Шрифты Unbounded, Onest, JetBrains Mono (SIL OFL) · Иконки собственные (ISC)</div>
+</main>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ui.js"></script>
+<script>
+(function () {
+  var A = ASQ;
+  document.getElementById('icon-grid').innerHTML = Object.keys(A.ICONS).map(function (k) { return '<div>' + A.ic(k) + '<span>' + k + '</span></div>'; }).join('');
+  document.querySelectorAll('.icon-btn:not([aria-label="С точкой"])').forEach(function (b, i) { if (!b.innerHTML.trim()) b.innerHTML = A.ic(['heart', 'bell', 'play', 'pause', 'more', 'more', 'close'][i % 7]); });
+  document.querySelector('.icon-btn[aria-label="С точкой"]').insertAdjacentHTML('afterbegin', A.ic('bell'));
+  document.getElementById('cv1').innerHTML = A.cover(38, 3); document.getElementById('cv2').innerHTML = A.cover(320, 5); document.getElementById('cv3').innerHTML = A.cover(205, 7);
+  document.getElementById('wv1').innerHTML = A.wave(38, 60, 0.45); document.getElementById('wv2').innerHTML = A.wave(12, 60, 0.2);
+  document.getElementById('tb-demo').innerHTML = A.tabbar('studio');
+  document.getElementById('ab-demo').innerHTML = A.appbar({ back: true, title: 'Обработка', sub: 'Шаг 3 из 4', right: '<button class="icon-btn">' + A.ic('split') + '</button>' });
+  document.getElementById('ab-demo2').innerHTML = A.appbar({ cls: 'appbar--home', center: false, left: '<div class="brand"><span class="brand__mark">' + A.ic('mic', { style: '--ic:18px' }) + '</span><span class="brand__name">ASIQPAI</span></div>', title: '', right: '<button class="icon-btn">' + A.ic('bell') + '<span class="icon-btn__dot"></span></button>' + A.avatar('AK', 40) });
+  document.getElementById('lanes-demo').innerHTML =
+    '<div class="lane" style="--lc:var(--trk-beat);opacity:.85"><div class="lane__head"><span class="lane__name">BEAT</span><span class="lane__sub">Night Drive</span></div><div class="lane__wave">' + A.wave(99, 44, 0.3) + '</div><div class="lane__ctrls"><button class="lane__ctrl is-mute">M</button><button class="lane__ctrl">' + A.ic('volume', { style: '--ic:14px' }) + '</button></div></div>' +
+    '<div class="lane is-armed" style="--lc:var(--trk-mid)"><div class="lane__head"><span class="lane__name">MID</span><span class="lane__sub">основной вокал</span><span class="lane__take">take 1 · 1 дубль</span></div><div class="lane__wave">' + A.wave(3, 44, 0.3) + '</div><div class="lane__ctrls"><button class="lane__ctrl is-mute">M</button><button class="lane__ctrl is-solo is-on">S</button></div></div>' +
+    '<div class="lane is-empty" style="--lc:var(--trk-back)"><div class="lane__head"><span class="lane__name">BACK</span><span class="lane__sub">даблы / бэки</span></div><div class="lane__wave">Пусто · нажми, чтобы выбрать</div><div class="lane__ctrls"><button class="lane__ctrl is-mute">M</button><button class="lane__ctrl is-solo">S</button></div></div>' +
+    '<div class="playhead" style="--x:calc(100px + (100% - 150px) * 0.3)"></div>';
+  document.getElementById('slicer-demo').innerHTML = '<div class="slicer__region" style="--l:31%;--w:13%"></div>' + A.wave(5, 90) + [8, 19, 31, 44, 57, 70, 83].map(function (c, i) { return '<div class="slicer__cut ' + (i === 2 ? 'is-sel' : '') + '" style="--x:' + c + '%" data-n="' + (i + 1) + '"></div>'; }).join('');
+  document.querySelectorAll('.seg__item, .tabs__item, .chip, .pad').forEach(function (el) { el.addEventListener('click', function () { var sib = el.parentElement.children; for (var i = 0; i < sib.length; i++) sib[i].classList.remove('is-active'); el.classList.add('is-active'); }); });
+  document.querySelectorAll('.range').forEach(function (r) { r.addEventListener('input', function () { r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%'); }); });
+})();
+</script>
+</body>
+</html>
