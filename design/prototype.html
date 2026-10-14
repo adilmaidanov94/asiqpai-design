@@ -29,6 +29,7 @@
   .stage__bar button { border: 0; background: none; color: var(--fg-3); font-size: 12px; padding: 6px 12px; border-radius: 999px; }
   .stage__bar button.is-active { background: var(--surface-3); color: var(--fg); }
   .menu-toggle { display: none; }
+  body.no-chrome .host { grid-template-columns: 1fr; } body.no-chrome .side, body.no-chrome .stage__bar, body.no-chrome .menu-toggle { display: none !important; } body.no-chrome .stage { padding: 0; } body.no-chrome .phone { transform: none !important; }
   @media (max-width: 760px) {
     .host { grid-template-columns: 1fr; }
     .side { display: none; }
@@ -122,7 +123,12 @@
     document.querySelectorAll('.side .nav button').forEach(function (b) { b.classList.toggle('is-active', b.querySelector('small').textContent === cur.name); });
   };
   A.mount(document.getElementById('app'));
-  A.go('onboarding', { step: 0 });
+  // Deep link: prototype.html?screen=<id>[&id=<param>] or #<id> opens a screen directly
+  var q = new URLSearchParams(location.search); var want = q.get('screen') || (location.hash || '').slice(1);
+  var all = SCREENS.concat(STATES).concat(FLOWS); var hit = all.filter(function (x) { return x[1] === want; })[0];
+  if (hit) { var h2 = hit.slice(); if (q.get('id')) h2[2] = { id: q.get('id') }; open(h2); if (q.get('sheet') && A.sheets[q.get('sheet')]) setTimeout(function () { A.sheets[q.get('sheet')]({}); }, 300); }
+  else A.go('onboarding', { step: 0 });
+  if (q.get('chrome') === '0') document.body.classList.add('no-chrome');
 
   // host options
   var phone = document.getElementById('phone');
