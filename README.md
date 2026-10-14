@@ -1,6 +1,6 @@
 # ASIQPAI — UX/UI дизайн-пакет (Telegram Mini App)
 
-Репозиторий: https://github.com/adilmaidanov94/asiqpai-design (private). Опубликованный пакет: https://claude.ai/artifact/KjM84mjs4WktWxN4Tu8CrZ. Заявка (письмо и календарный план): `Заявка_ASIQPAI_письмо_и_план.pdf`.
+Репозиторий: https://github.com/adilmaidanov94/asiqpai-design. Онлайн: https://adilmaidanov94.github.io/asiqpai-design/ (прототип: https://adilmaidanov94.github.io/asiqpai-design/design/prototype.html). Опубликованный пакет: https://claude.ai/artifact/KjM84mjs4WktWxN4Tu8CrZ. Заявка (письмо и календарный план): `Заявка_ASIQPAI_письмо_и_план.pdf`.
 
 ## Что это
 
